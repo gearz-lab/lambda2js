@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Masb.ExpressionTreeToJavascript.Tests
@@ -203,6 +204,39 @@ namespace Masb.ExpressionTreeToJavascript.Tests
                 };
             var js = expr.CompileToJavascript();
             Assert.AreEqual(@"[{name:""Miguel"",age:30,func:function(y){return (y+10)*0.5;},list:[""a"",""b"",""c""]},{name:""André"",age:30,func:function(z){return z+5;},list:[10,20,30]}]", js);
+        }
+
+        [TestMethod]
+        public void Regex1()
+        {
+            Expression<Func<Regex>> expr = () => new Regex(@"^\d{4}-\d\d-\d\d$", RegexOptions.IgnoreCase);
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"/^\d{4}-\d\d-\d\d$/gi", js);
+        }
+
+        [TestMethod]
+        public void Regex1b()
+        {
+            Expression<Func<Regex>> expr = () => new Regex(@"^\d{4}-\d\d-\d\d$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"/^\d{4}-\d\d-\d\d$/gim", js);
+        }
+
+        [TestMethod]
+        public void Regex2()
+        {
+            Expression<Func<Func<string, Regex>>> expr = () => (p => new Regex(p, RegexOptions.IgnoreCase | RegexOptions.Multiline));
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"function(p){return new RegExp(p,'gim');}", js);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void Regex3()
+        {
+            Expression<Func<Func<string, RegexOptions, Regex>>> expr = () => ((p, o) => new Regex(p, o | RegexOptions.Multiline));
+            var js = expr.CompileToJavascript();
+            //Assert.AreEqual(@"function(p,o){return new RegExp(p,'g'+o+'m');}", js);
         }
     }
 

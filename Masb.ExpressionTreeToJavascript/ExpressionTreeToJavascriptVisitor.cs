@@ -194,7 +194,7 @@ namespace Masb.ExpressionTreeToJavascript
                 foreach (var param in node.Parameters)
                 {
                     if (param.IsByRef)
-                        throw new Exception("Cannot pass by ref in javascript.");
+                        throw new NotSupportedException("Cannot pass by ref in javascript.");
 
                     if (this.result.Length > posStart)
                         this.result.Append(',');
@@ -267,12 +267,12 @@ namespace Masb.ExpressionTreeToJavascript
                             this.result.Append(',');
 
                         if (init.Arguments.Count != 2)
-                            throw new Exception(
+                            throw new NotSupportedException(
                                 "Objects can only be initialized with methods that receive pairs: key -> name");
 
                         var nameArg = init.Arguments[0];
                         if (nameArg.NodeType != ExpressionType.Constant || nameArg.Type != typeof(string))
-                            throw new Exception("The key of an object must be a constant string value.");
+                            throw new NotSupportedException("The key of an object must be a constant string value");
 
                         var name = (string)((ConstantExpression)nameArg).Value;
                         if (Regex.IsMatch(name, @"^\w[\d\w]*$"))
@@ -428,7 +428,7 @@ namespace Masb.ExpressionTreeToJavascript
         protected override Expression VisitNew(NewExpression node)
         {
             // Detecting inline objects
-            if (node.Members.Count > 0)
+            if (node.Members != null && node.Members.Count > 0)
             {
                 using (this.Operation(0))
                 {
@@ -454,6 +454,69 @@ namespace Masb.ExpressionTreeToJavascript
                 }
 
                 return node;
+            }
+
+            if (node.Type == typeof(Regex))
+            {
+                var lambda = Expression.Lambda<Func<Regex>>(node);
+
+                // if all parameters are constant
+                if (node.Arguments.All(a => a.NodeType == ExpressionType.Constant))
+                {
+                    this.result.Append('/');
+
+                    var pattern = (string)((ConstantExpression)node.Arguments[0]).Value;
+                    this.result.Append(pattern);
+                    var args = node.Arguments.Count;
+
+                    this.result.Append('/');
+                    this.result.Append('g');
+                    RegexOptions options = 0;
+                    if (args == 2)
+                    {
+                        options = (RegexOptions)((ConstantExpression)node.Arguments[1]).Value;
+
+                        if ((options & RegexOptions.IgnoreCase) != 0)
+                            this.result.Append('i');
+                        if ((options & RegexOptions.Multiline) != 0)
+                            this.result.Append('m');
+                    }
+
+                    var ecmaRegex = new Regex(pattern, options | RegexOptions.ECMAScript);
+                }
+                else
+                {
+                    using (this.Operation(JavascriptOperationTypes.New))
+                    {
+                        this.result.Append("new RegExp(");
+
+                        using (this.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
+                            this.Visit(node.Arguments[0]);
+
+                        var args = node.Arguments.Count;
+
+                        if (args == 2)
+                        {
+                            this.result.Append(',');
+
+                            var optsConst = node.Arguments[1] as ConstantExpression;
+                            if (optsConst == null)
+                                throw new NotSupportedException("The options parameter of a Regex must be constant");
+
+                            var options = (RegexOptions)optsConst.Value;
+
+                            this.result.Append('\'');
+                            this.result.Append('g');
+                            if ((options & RegexOptions.IgnoreCase) != 0)
+                                this.result.Append('i');
+                            if ((options & RegexOptions.Multiline) != 0)
+                                this.result.Append('m');
+                            this.result.Append('\'');
+                        }
+
+                        this.result.Append(')');
+                    }
+                }
             }
 
             return node;
@@ -542,7 +605,7 @@ namespace Masb.ExpressionTreeToJavascript
             }
 
             if (!node.Method.IsStatic)
-                throw new Exception("Can only convert static methods.");
+                throw new NotSupportedException("Can only convert static methods.");
 
             using (this.Operation(JavascriptOperationTypes.Call))
             {
