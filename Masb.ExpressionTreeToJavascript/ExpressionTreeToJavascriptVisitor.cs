@@ -329,8 +329,24 @@ namespace Masb.ExpressionTreeToJavascript
                         this.Visit(arg);
                     }
                     this.result.Append(']');
+                    return node;
                 }
-                return node;
+            }
+            else
+            {
+                if (node.Method.Name == "ContainsKey" &&
+                (typeof(IDictionary).IsAssignableFrom(node.Method.DeclaringType) ||
+                 node.Method.DeclaringType.IsGenericType &&
+                 typeof(IDictionary<,>).IsAssignableFrom(node.Method.DeclaringType.GetGenericTypeDefinition())))
+                {
+                    this.result.Append('(');
+                    this.Visit(node.Object);
+                    this.result.Append(')');
+                    this.result.Append(".hasOwnProperty(");
+                    this.Visit(node.Arguments.Single());
+                    this.result.Append(')');
+                    return node;
+                }
             }
 
             if (!node.Method.IsStatic)

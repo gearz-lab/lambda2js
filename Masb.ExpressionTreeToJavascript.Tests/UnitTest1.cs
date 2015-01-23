@@ -66,6 +66,14 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         }
 
         [TestMethod]
+        public void DictionaryContainsKey()
+        {
+            Expression<Func<MyClass, object>> expr = x => x.PhonesByName.ContainsKey("Miguel");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("((PhonesByName).hasOwnProperty(\"Miguel\"))", js);
+        }
+
+        [TestMethod]
         public void OrElseOperator()
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 || x.Phones.Length != 1;
