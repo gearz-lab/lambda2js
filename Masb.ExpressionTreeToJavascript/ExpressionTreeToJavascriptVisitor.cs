@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 
 namespace Masb.ExpressionTreeToJavascript
 {
@@ -36,6 +39,11 @@ namespace Masb.ExpressionTreeToJavascript
                 return null;
 
             return new PrecedenceController(this.result, this.operandTypes, op);
+        }
+
+        public override Expression Visit(Expression node)
+        {
+            return base.Visit(node);
         }
 
         protected override Expression VisitBinary(BinaryExpression node)
@@ -93,28 +101,37 @@ namespace Masb.ExpressionTreeToJavascript
 
             if (numTypes.Contains(node.Type))
             {
-                this.result.Append(node.Value);
+                this.result.Append(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
             }
             else if (node.Type == typeof(string))
             {
-                this.result.Append('"');
-                this.result.Append(
-                    ((string)node.Value)
-                        .Replace("\r", "\\r")
-                        .Replace("\n", "\\n")
-                        .Replace("\t", "\\t")
-                        .Replace("\0", "\\0")
-                        .Replace("\"", "\\\""));
-                this.result.Append('"');
+                this.WriteStringLiteral((string)node.Value);
             }
-            else if (node.Type == typeof(System.Text.RegularExpressions.Regex))
+            else if (node.Type == typeof(Regex))
             {
                 this.result.Append('/');
                 this.result.Append(node.Value);
                 this.result.Append("/g");
             }
+            else if (node.Value == null)
+            {
+                this.result.Append("null");
+            }
 
             return node;
+        }
+
+        private void WriteStringLiteral(string str)
+        {
+            this.result.Append('"');
+            this.result.Append(
+                str
+                    .Replace("\r", "\\r")
+                    .Replace("\n", "\\n")
+                    .Replace("\t", "\\t")
+                    .Replace("\0", "\\0")
+                    .Replace("\"", "\\\""));
+            this.result.Append('"');
         }
 
         protected override Expression VisitDebugInfo(DebugInfoExpression node)
@@ -198,8 +215,107 @@ namespace Masb.ExpressionTreeToJavascript
             }
         }
 
+        private static bool IsDictionaryType([NotNull] Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (typeof(IDictionary).IsAssignableFrom(type))
+                return true;
+
+            if (type.IsGenericType)
+            {
+                var generic = type.GetGenericTypeDefinition();
+                if (typeof(IDictionary<,>).IsAssignableFrom(generic))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsListType([NotNull] Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (typeof(ICollection).IsAssignableFrom(type))
+                return true;
+
+            if (type.IsGenericType)
+            {
+                var generic = type.GetGenericTypeDefinition();
+                if (typeof(ICollection<>).IsAssignableFrom(generic))
+                    return true;
+            }
+
+            return false;
+        }
+
         protected override Expression VisitListInit(ListInitExpression node)
         {
+            // Detecting a new dictionary
+            if (IsDictionaryType(node.Type))
+            {
+                using (this.Operation(0))
+                {
+                    this.result.Append('{');
+
+                    var posStart = this.result.Length;
+                    foreach (var init in node.Initializers)
+                    {
+                        if (this.result.Length > posStart)
+                            this.result.Append(',');
+
+                        if (init.Arguments.Count != 2)
+                            throw new Exception(
+                                "Objects can only be initialized with methods that receive pairs: key -> name");
+
+                        var nameArg = init.Arguments[0];
+                        if (nameArg.NodeType != ExpressionType.Constant || nameArg.Type != typeof(string))
+                            throw new Exception("The key of an object must be a constant string value.");
+
+                        var name = (string)((ConstantExpression)nameArg).Value;
+                        if (Regex.IsMatch(name, @"^\w[\d\w]*$"))
+                            this.result.Append(name);
+                        else
+                            this.WriteStringLiteral(name);
+
+                        this.result.Append(':');
+                        this.Visit(init.Arguments[1]);
+                    }
+
+                    this.result.Append('}');
+                }
+
+                return node;
+            }
+
+            // Detecting a new dictionary
+            if (IsListType(node.Type))
+            {
+                using (this.Operation(0))
+                {
+                    this.result.Append('[');
+
+                    var posStart = this.result.Length;
+                    foreach (var init in node.Initializers)
+                    {
+                        if (this.result.Length > posStart)
+                            this.result.Append(',');
+
+                        if (init.Arguments.Count != 1)
+                            throw new Exception(
+                                "Arrays can only be initialized with methods that receive a single parameter for the value");
+
+                        this.Visit(init.Arguments[0]);
+                    }
+
+                    this.result.Append(']');
+                }
+
+                return node;
+            }
+
             return node;
         }
 
@@ -290,11 +406,56 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitNewArray(NewArrayExpression node)
         {
+            using (this.Operation(0))
+            {
+                this.result.Append('[');
+
+                var posStart = this.result.Length;
+                foreach (var item in node.Expressions)
+                {
+                    if (this.result.Length > posStart)
+                        this.result.Append(',');
+
+                    this.Visit(item);
+                }
+
+                this.result.Append(']');
+            }
+
             return node;
         }
 
         protected override Expression VisitNew(NewExpression node)
         {
+            // Detecting inline objects
+            if (node.Members.Count > 0)
+            {
+                using (this.Operation(0))
+                {
+                    this.result.Append('{');
+
+                    var posStart = this.result.Length;
+                    for (int itMember = 0; itMember < node.Members.Count; itMember++)
+                    {
+                        var member = node.Members[itMember];
+                        if (this.result.Length > posStart)
+                            this.result.Append(',');
+
+                        if (Regex.IsMatch(member.Name, @"^\w[\d\w]*$"))
+                            this.result.Append(member.Name);
+                        else
+                            this.WriteStringLiteral(member.Name);
+
+                        this.result.Append(':');
+                        this.Visit(node.Arguments[itMember]);
+                    }
+
+                    this.result.Append('}');
+                }
+
+                return node;
+            }
+
             return node;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -87,6 +88,121 @@ namespace Masb.ExpressionTreeToJavascript.Tests
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 | x.Phones.Length != 1;
             var js = expr.CompileToJavascript();
             Assert.AreEqual("PhonesByName[\"Miguel\"].DDD==32|Phones.length!=1", js);
+        }
+
+        [TestMethod]
+        public void InlineNewDictionary1()
+        {
+            Expression<Func<MyClass, object>> expr = x => new Dictionary<string, string>
+                {
+                    { "name", "Miguel" },
+                    { "age", "30" },
+                    { "birth-date", "1984-05-04" },
+                };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("{name:\"Miguel\",age:\"30\",\"birth-date\":\"1984-05-04\"}", js);
+        }
+
+        [TestMethod]
+        public void InlineNewDictionary2()
+        {
+            Expression<Func<MyClass, object>> expr = x => new Hashtable
+                {
+                    { "name", "Miguel" },
+                    { "age", 30 },
+                    { "birth-date", "1984-05-04" },
+                };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("{name:\"Miguel\",age:30,\"birth-date\":\"1984-05-04\"}", js);
+        }
+
+        [TestMethod]
+        public void InlineNewObject()
+        {
+            Expression<Func<MyClass, object>> expr = x => new
+            {
+                name = "Miguel",
+                age = 30,
+                birthDate = "1984-05-04",
+            };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("{name:\"Miguel\",age:30,birthDate:\"1984-05-04\"}", js);
+        }
+
+        [TestMethod]
+        public void InlineNewArray1()
+        {
+            Expression<Func<MyClass, object>> expr = x => new[] { 1, 2, 3 };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("[1,2,3]", js);
+        }
+
+        [TestMethod]
+        public void InlineNewArray2()
+        {
+            Expression<Func<MyClass, object>> expr = x => new object[] { 1, 2, 3, "Miguel" };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("[1,2,3,\"Miguel\"]", js);
+        }
+
+        [TestMethod]
+        public void InlineNewArray3()
+        {
+            Expression<Func<MyClass, object>> expr = x => new object[] { 1, 2, 3, "Miguel", (Func<int>)(() => 20) };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("[1,2,3,\"Miguel\",function(){return 20;}]", js);
+        }
+
+        [TestMethod]
+        public void InlineNewArray4()
+        {
+            Expression<Func<MyClass, object>> expr = x => new[]
+                {
+                    new[] { 1, 2 },
+                    new[] { 3, 4 },
+                };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("[[1,2],[3,4]]", js);
+        }
+
+        [TestMethod]
+        public void InlineNewList1()
+        {
+            Expression<Func<MyClass, object>> expr = x => new List<int> { 1, 2, 3 };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("[1,2,3]", js);
+        }
+
+        [TestMethod]
+        public void InlineNewList2()
+        {
+            Expression<Func<MyClass, object>> expr = x => new ArrayList { 1, 2, 3 };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("[1,2,3]", js);
+        }
+
+        [TestMethod]
+        public void InlineNewMultipleThings()
+        {
+            Expression<Func<MyClass, object>> expr = x => new object[]
+                {
+                    new Dictionary<string, object>
+                        {
+                            { "name", "Miguel" },
+                            { "age", 30 },
+                            { "func", (Func<int, double>)(y => (y + 10) * 0.5) },
+                            { "list", new List<string> { "a", "b", "c" } },
+                        },
+                    new
+                        {
+                            name = "André",
+                            age = 30,
+                            func = (Func<int, int>)(z => z + 5),
+                            list = new List<int> { 10, 20, 30 },
+                        }
+                };
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"[{name:""Miguel"",age:30,func:function(y){return (y+10)*0.5;},list:[""a"",""b"",""c""]},{name:""André"",age:30,func:function(z){return z+5;},list:[10,20,30]}]", js);
         }
     }
 
