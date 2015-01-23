@@ -81,3 +81,4 @@ UpgradeLog*.htm*
 # files not to be commited
 Uncommited.*
 Uncommited/
+*.TMP

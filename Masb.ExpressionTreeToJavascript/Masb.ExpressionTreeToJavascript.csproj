@@ -38,8 +38,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExpressionTreeToJavascriptVisitor.cs" />
+    <Compile Include="JavascriptOperationTypes.cs" />
     <Compile Include="JetBrains.Annotations.cs" />
+    <Compile Include="JsOperationHelper.cs" />
     <Compile Include="LambdaExpressionExtensions.cs" />
+    <Compile Include="PrecedenceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

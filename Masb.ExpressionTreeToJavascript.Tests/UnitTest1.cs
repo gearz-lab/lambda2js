@@ -14,7 +14,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.Phones.Where(p => p.DDD == 21);
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("System.Linq.Enumerable.Where(Phones,function(p){return((p.DDD)==(21));})", js);
+            Assert.AreEqual("System.Linq.Enumerable.Where(Phones,function(p){return p.DDD==21;})", js);
         }
 
         [TestMethod]
@@ -22,7 +22,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.Phones.Count();
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("(System.Linq.Enumerable.Count(Phones))", js);
+            Assert.AreEqual("System.Linq.Enumerable.Count(Phones)", js);
         }
 
         [TestMethod]
@@ -30,7 +30,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.Phones.FirstOrDefault(p => p.DDD > 10);
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("System.Linq.Enumerable.FirstOrDefault(Phones,function(p){return((p.DDD)>(10));})", js);
+            Assert.AreEqual("System.Linq.Enumerable.FirstOrDefault(Phones,function(p){return p.DDD>10;})", js);
         }
 
         [TestMethod]
@@ -38,7 +38,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.Phones.Length;
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("((Phones).length)", js);
+            Assert.AreEqual("Phones.length", js);
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.Phones[10];
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("(Phones)[10]", js);
+            Assert.AreEqual("Phones[10]", js);
         }
 
         [TestMethod]
@@ -54,7 +54,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => ((IList<Phone>)x.Phones).Count;
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("((Phones).length)", js);
+            Assert.AreEqual("Phones.length", js);
         }
 
         [TestMethod]
@@ -62,7 +62,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"];
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("(PhonesByName)[\"Miguel\"]", js);
+            Assert.AreEqual("PhonesByName[\"Miguel\"]", js);
         }
 
         [TestMethod]
@@ -70,7 +70,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName.ContainsKey("Miguel");
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("((PhonesByName).hasOwnProperty(\"Miguel\"))", js);
+            Assert.AreEqual("PhonesByName.hasOwnProperty(\"Miguel\")", js);
         }
 
         [TestMethod]
@@ -78,7 +78,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 || x.Phones.Length != 1;
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("((((PhonesByName)[\"Miguel\"].DDD)==(32))||(((Phones).length)!=(1)))", js);
+            Assert.AreEqual("PhonesByName)[\"Miguel\"].DDD==32||Phones.length!=1", js);
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 | x.Phones.Length != 1;
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("((((PhonesByName)[\"Miguel\"].DDD)==(32))|(((Phones).length)!=(1)))", js);
+            Assert.AreEqual("PhonesByName[\"Miguel\"].DDD==32|Phones.length!=1", js);
         }
     }
 

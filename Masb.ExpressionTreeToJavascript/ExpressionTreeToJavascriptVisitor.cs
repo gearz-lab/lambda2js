@@ -12,36 +12,7 @@ namespace Masb.ExpressionTreeToJavascript
     {
         private readonly ParameterExpression contextParameter;
         private readonly StringBuilder result = new StringBuilder();
-
-        private static readonly ExpressionType[] post = new[]
-            {
-                ExpressionType.ArrayLength,
-                ExpressionType.PostIncrementAssign,
-                ExpressionType.PostDecrementAssign,
-            };
-
-        private static readonly ExpressionType[] assign = new[]
-            {
-                ExpressionType.Assign,
-                ExpressionType.AddAssign,
-                ExpressionType.AddAssignChecked,
-                ExpressionType.AndAssign,
-                ExpressionType.DivideAssign,
-                ExpressionType.ExclusiveOrAssign,
-                ExpressionType.LeftShiftAssign,
-                ExpressionType.ModuloAssign,
-                ExpressionType.MultiplyAssign,
-                ExpressionType.MultiplyAssignChecked,
-                ExpressionType.OrAssign,
-                ExpressionType.PostDecrementAssign,
-                ExpressionType.PostIncrementAssign,
-                ExpressionType.PowerAssign,
-                ExpressionType.PreDecrementAssign,
-                ExpressionType.PreIncrementAssign,
-                ExpressionType.RightShiftAssign,
-                ExpressionType.SubtractAssign,
-                ExpressionType.SubtractAssignChecked,
-            };
+        private readonly List<JavascriptOperationTypes> operandTypes = new List<JavascriptOperationTypes>();
 
         public ExpressionTreeToJavascriptVisitor(ParameterExpression contextParameter)
         {
@@ -53,32 +24,41 @@ namespace Masb.ExpressionTreeToJavascript
             get { return this.result.ToString(); }
         }
 
+        private PrecedenceController Operation(JavascriptOperationTypes op)
+        {
+            return new PrecedenceController(this.result, this.operandTypes, op);
+        }
+
+        private IDisposable Operation(Expression node)
+        {
+            var op = JsOperationHelper.GetJsOperator(node.NodeType);
+            if (op == JavascriptOperationTypes.NoOp)
+                return null;
+
+            return new PrecedenceController(this.result, this.operandTypes, op);
+        }
+
         protected override Expression VisitBinary(BinaryExpression node)
         {
             if (node.NodeType == ExpressionType.ArrayIndex)
             {
-                this.result.Append('(');
-                this.Visit(node.Left);
-                this.result.Append(')');
-                this.result.Append('[');
-                this.Visit(node.Right);
-                this.result.Append(']');
-                return node;
+                using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                {
+                    this.Visit(node.Left);
+                    this.result.Append('[');
+                    using (this.Operation(0))
+                        this.Visit(node.Right);
+                    this.result.Append(']');
+                    return node;
+                }
             }
 
-            var isAssignOp = assign.Contains(node.NodeType);
-
-            if (!isAssignOp)
-                this.result.Append('(');
-            this.Visit(node.Left);
-            if (!isAssignOp)
-                this.result.Append(')');
-
-            this.WriteOperator(node.NodeType);
-
-            this.result.Append('(');
-            this.Visit(node.Right);
-            this.result.Append(')');
+            using (this.Operation(node))
+            {
+                this.Visit(node.Left);
+                JsOperationHelper.WriteOperator(this.result, node.NodeType);
+                this.Visit(node.Right);
+            }
 
             return node;
         }
@@ -189,26 +169,33 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitLambda<T>(Expression<T> node)
         {
-            this.result.Append("function(");
-
-            var posStart = this.result.Length;
-            foreach (var param in node.Parameters)
+            using (this.Operation(node))
             {
-                if (param.IsByRef)
-                    throw new Exception("Cannot pass by ref in javascript.");
+                this.result.Append("function(");
 
-                if (this.result.Length > posStart)
-                    this.result.Append(',');
+                var posStart = this.result.Length;
+                foreach (var param in node.Parameters)
+                {
+                    if (param.IsByRef)
+                        throw new Exception("Cannot pass by ref in javascript.");
 
-                this.result.Append(param.Name);
+                    if (this.result.Length > posStart)
+                        this.result.Append(',');
+
+                    this.result.Append(param.Name);
+                }
+
+                this.result.Append("){");
+                if (node.ReturnType != typeof(void))
+                    using (this.Operation(0))
+                    {
+                        this.result.Append("return ");
+                        this.Visit(node.Body);
+                    }
+
+                this.result.Append(";}");
+                return node;
             }
-
-            this.result.Append("){return(");
-
-            this.Visit(node.Body);
-
-            this.result.Append(");}");
-            return node;
         }
 
         protected override Expression VisitListInit(ListInitExpression node)
@@ -223,27 +210,30 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            var pos = this.result.Length;
-            if (node.Expression != this.contextParameter)
-                this.Visit(node.Expression);
-
-            if (this.result.Length > pos)
-                this.result.Append('.');
-
-            var propInfo = node.Member as PropertyInfo;
-            if (propInfo != null && node.Type == typeof(int) && node.Member.Name == "Count" &&
-                (typeof(ICollection).IsAssignableFrom(propInfo.DeclaringType) ||
-                 propInfo.DeclaringType.IsGenericType &&
-                 typeof(ICollection<>).IsAssignableFrom(propInfo.DeclaringType.GetGenericTypeDefinition())))
+            using (this.Operation(node))
             {
-                this.result.Append("length");
-            }
-            else
-            {
-                this.result.Append(node.Member.Name);
-            }
+                var pos = this.result.Length;
+                if (node.Expression != this.contextParameter)
+                    this.Visit(node.Expression);
 
-            return node;
+                if (this.result.Length > pos)
+                    this.result.Append('.');
+
+                var propInfo = node.Member as PropertyInfo;
+                if (propInfo != null && node.Type == typeof(int) && node.Member.Name == "Count" &&
+                    (typeof(ICollection).IsAssignableFrom(propInfo.DeclaringType) ||
+                     propInfo.DeclaringType.IsGenericType &&
+                     typeof(ICollection<>).IsAssignableFrom(propInfo.DeclaringType.GetGenericTypeDefinition())))
+                {
+                    this.result.Append("length");
+                }
+                else
+                {
+                    this.result.Append(node.Member.Name);
+                }
+
+                return node;
+            }
         }
 
         protected override MemberAssignment VisitMemberAssignment(MemberAssignment node)
@@ -253,20 +243,18 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            var isAssignOp = assign.Contains(node.NodeType);
-            var isPostOp = post.Contains(node.NodeType);
+            using (this.Operation(node))
+            {
+                var isPostOp = JsOperationHelper.IsPostfixOperator(node.NodeType);
 
-            if (!isPostOp)
-                this.WriteOperator(node.NodeType);
-            if (!isAssignOp)
-                this.result.Append("(");
-            this.Visit(node.Operand);
-            if (!isAssignOp)
-                this.result.Append(")");
-            if (isPostOp)
-                this.WriteOperator(node.NodeType);
+                if (!isPostOp)
+                    JsOperationHelper.WriteOperator(this.result, node.NodeType);
+                this.Visit(node.Operand);
+                if (isPostOp)
+                    JsOperationHelper.WriteOperator(this.result, node.NodeType);
 
-            return node;
+                return node;
+            }
         }
 
         protected override Expression VisitTypeBinary(TypeBinaryExpression node)
@@ -316,19 +304,59 @@ namespace Masb.ExpressionTreeToJavascript
             {
                 if (node.Method.Name == "get_Item")
                 {
-                    this.result.Append('(');
-                    this.Visit(node.Object);
-                    this.result.Append(')');
-                    this.result.Append('[');
-                    var posStart0 = this.result.Length;
-                    foreach (var arg in node.Arguments)
+                    using (this.Operation(JavascriptOperationTypes.IndexerProperty))
                     {
-                        if (this.result.Length != posStart0)
-                            this.result.Append(',');
+                        this.Visit(node.Object);
+                        this.result.Append('[');
 
-                        this.Visit(arg);
+                        using (this.Operation(0))
+                        {
+                            var posStart0 = this.result.Length;
+                            foreach (var arg in node.Arguments)
+                            {
+                                if (this.result.Length != posStart0)
+                                    this.result.Append(',');
+
+                                this.Visit(arg);
+                            }
+                        }
+
+                        this.result.Append(']');
+                        return node;
                     }
-                    this.result.Append(']');
+                }
+
+                if (node.Method.Name == "set_Item")
+                {
+                    using (this.Operation(0))
+                    {
+                        using (this.Operation(JavascriptOperationTypes.AssignRhs))
+                        {
+                            using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                            {
+                                this.Visit(node.Object);
+                                this.result.Append('[');
+
+                                using (this.Operation(0))
+                                {
+                                    var posStart0 = this.result.Length;
+                                    foreach (var arg in node.Arguments)
+                                    {
+                                        if (this.result.Length != posStart0)
+                                            this.result.Append(',');
+
+                                        this.Visit(arg);
+                                    }
+                                }
+
+                                this.result.Append(']');
+                            }
+                        }
+
+                        this.result.Append('=');
+                        this.Visit(node.Arguments.Single());
+                    }
+
                     return node;
                 }
             }
@@ -339,36 +367,43 @@ namespace Masb.ExpressionTreeToJavascript
                  node.Method.DeclaringType.IsGenericType &&
                  typeof(IDictionary<,>).IsAssignableFrom(node.Method.DeclaringType.GetGenericTypeDefinition())))
                 {
-                    this.result.Append('(');
-                    this.Visit(node.Object);
-                    this.result.Append(')');
-                    this.result.Append(".hasOwnProperty(");
-                    this.Visit(node.Arguments.Single());
-                    this.result.Append(')');
-                    return node;
+                    using (this.Operation(JavascriptOperationTypes.Call))
+                    {
+                        using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                            this.Visit(node.Object);
+                        this.result.Append(".hasOwnProperty(");
+                        using (this.Operation(0))
+                            this.Visit(node.Arguments.Single());
+                        this.result.Append(')');
+                        return node;
+                    }
                 }
             }
 
             if (!node.Method.IsStatic)
                 throw new Exception("Can only convert static methods.");
 
-            this.result.AppendFormat(
-                "{0}.{1}(",
-                node.Method.DeclaringType.FullName,
-                node.Method.Name);
-
-            var posStart = this.result.Length;
-            foreach (var arg in node.Arguments)
+            using (this.Operation(JavascriptOperationTypes.Call))
             {
-                if (this.result.Length != posStart)
-                    this.result.Append(',');
+                this.result.Append(node.Method.DeclaringType.FullName);
+                this.result.Append('.');
+                this.result.Append(node.Method.Name);
+                this.result.Append('(');
 
-                this.Visit(arg);
+                var posStart = this.result.Length;
+                using (this.Operation(0))
+                    foreach (var arg in node.Arguments)
+                    {
+                        if (this.result.Length != posStart)
+                            this.result.Append(',');
+
+                        this.Visit(arg);
+                    }
+
+                this.result.Append(')');
+
+                return node;
             }
-
-            this.result.Append(')');
-
-            return node;
         }
 
         protected override MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding node)
@@ -389,221 +424,6 @@ namespace Masb.ExpressionTreeToJavascript
         protected override MemberBinding VisitMemberBinding(MemberBinding node)
         {
             return node;
-        }
-
-        private void WriteOperator(ExpressionType nodeType)
-        {
-            switch (nodeType)
-            {
-                case ExpressionType.Add:
-                    this.result.Append('+');
-                    break;
-                case ExpressionType.AddAssign:
-                    this.result.Append("+=");
-                    break;
-                case ExpressionType.AddAssignChecked:
-                    break;
-                case ExpressionType.AddChecked:
-                    break;
-                case ExpressionType.And:
-                    this.result.Append("&");
-                    break;
-                case ExpressionType.AndAlso:
-                    this.result.Append("&&");
-                    break;
-                case ExpressionType.AndAssign:
-                    this.result.Append("&=");
-                    break;
-                case ExpressionType.ArrayIndex:
-                    break;
-                case ExpressionType.ArrayLength:
-                    this.result.Append(".length");
-                    break;
-                case ExpressionType.Assign:
-                    this.result.Append("=");
-                    break;
-                case ExpressionType.Block:
-                    break;
-                case ExpressionType.Call:
-                    break;
-                case ExpressionType.Coalesce:
-                    this.result.Append("||");
-                    break;
-                case ExpressionType.Conditional:
-                    break;
-                case ExpressionType.Constant:
-                    break;
-                case ExpressionType.Convert:
-                    break;
-                case ExpressionType.ConvertChecked:
-                    break;
-                case ExpressionType.DebugInfo:
-                    break;
-                case ExpressionType.Decrement:
-                    this.result.Append("--");
-                    break;
-                case ExpressionType.Default:
-                    break;
-                case ExpressionType.Divide:
-                    this.result.Append("/");
-                    break;
-                case ExpressionType.DivideAssign:
-                    this.result.Append("/=");
-                    break;
-                case ExpressionType.Dynamic:
-                    break;
-                case ExpressionType.Equal:
-                    this.result.Append("==");
-                    break;
-                case ExpressionType.ExclusiveOr:
-                    this.result.Append("^");
-                    break;
-                case ExpressionType.ExclusiveOrAssign:
-                    this.result.Append("^=");
-                    break;
-                case ExpressionType.Extension:
-                    break;
-                case ExpressionType.Goto:
-                    break;
-                case ExpressionType.GreaterThan:
-                    this.result.Append(">");
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    this.result.Append(">=");
-                    break;
-                case ExpressionType.Increment:
-                    this.result.Append("++");
-                    break;
-                case ExpressionType.Index:
-                    break;
-                case ExpressionType.Invoke:
-                    break;
-                case ExpressionType.IsFalse:
-                    break;
-                case ExpressionType.IsTrue:
-                    break;
-                case ExpressionType.Label:
-                    break;
-                case ExpressionType.Lambda:
-                    break;
-                case ExpressionType.LeftShift:
-                    break;
-                case ExpressionType.LeftShiftAssign:
-                    break;
-                case ExpressionType.LessThan:
-                    this.result.Append("<");
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    this.result.Append("<=");
-                    break;
-                case ExpressionType.ListInit:
-                    break;
-                case ExpressionType.Loop:
-                    break;
-                case ExpressionType.MemberAccess:
-                    break;
-                case ExpressionType.MemberInit:
-                    break;
-                case ExpressionType.Modulo:
-                    this.result.Append("%");
-                    break;
-                case ExpressionType.ModuloAssign:
-                    this.result.Append("%=");
-                    break;
-                case ExpressionType.Multiply:
-                    this.result.Append("*");
-                    break;
-                case ExpressionType.MultiplyAssign:
-                    this.result.Append("*=");
-                    break;
-                case ExpressionType.MultiplyAssignChecked:
-                    break;
-                case ExpressionType.MultiplyChecked:
-                    break;
-                case ExpressionType.Negate:
-                    this.result.Append("-");
-                    break;
-                case ExpressionType.NegateChecked:
-                    break;
-                case ExpressionType.New:
-                    break;
-                case ExpressionType.NewArrayBounds:
-                    break;
-                case ExpressionType.NewArrayInit:
-                    break;
-                case ExpressionType.Not:
-                    this.result.Append("!");
-                    break;
-                case ExpressionType.NotEqual:
-                    this.result.Append("!=");
-                    break;
-                case ExpressionType.OnesComplement:
-                    this.result.Append("~");
-                    break;
-                case ExpressionType.Or:
-                    this.result.Append("|");
-                    break;
-                case ExpressionType.OrAssign:
-                    this.result.Append("|=");
-                    break;
-                case ExpressionType.OrElse:
-                    this.result.Append("||");
-                    break;
-                case ExpressionType.Parameter:
-                    break;
-                case ExpressionType.PostDecrementAssign:
-                    break;
-                case ExpressionType.PostIncrementAssign:
-                    break;
-                case ExpressionType.Power:
-                    break;
-                case ExpressionType.PowerAssign:
-                    break;
-                case ExpressionType.PreDecrementAssign:
-                    this.result.Append("--");
-                    break;
-                case ExpressionType.PreIncrementAssign:
-                    this.result.Append("++");
-                    break;
-                case ExpressionType.Quote:
-                    break;
-                case ExpressionType.RightShift:
-                    break;
-                case ExpressionType.RightShiftAssign:
-                    break;
-                case ExpressionType.RuntimeVariables:
-                    break;
-                case ExpressionType.Subtract:
-                    this.result.Append("-");
-                    break;
-                case ExpressionType.SubtractAssign:
-                    this.result.Append("-=");
-                    break;
-                case ExpressionType.SubtractAssignChecked:
-                    this.result.Append("--");
-                    break;
-                case ExpressionType.SubtractChecked:
-                    this.result.Append("-");
-                    break;
-                case ExpressionType.Switch:
-                    break;
-                case ExpressionType.Throw:
-                    break;
-                case ExpressionType.Try:
-                    break;
-                case ExpressionType.TypeAs:
-                    break;
-                case ExpressionType.TypeEqual:
-                    break;
-                case ExpressionType.TypeIs:
-                    break;
-                case ExpressionType.UnaryPlus:
-                    break;
-                case ExpressionType.Unbox:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
     }
 }

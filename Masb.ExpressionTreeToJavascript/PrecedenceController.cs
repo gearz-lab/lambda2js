@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Masb.ExpressionTreeToJavascript
+{
+    public class PrecedenceController : IDisposable
+    {
+        private readonly StringBuilder result;
+        private readonly List<JavascriptOperationTypes> operandTypes;
+        private readonly JavascriptOperationTypes op;
+
+        public PrecedenceController(StringBuilder result, List<JavascriptOperationTypes> operandTypes, JavascriptOperationTypes op)
+        {
+            this.result = result;
+            this.operandTypes = operandTypes;
+            this.op = op;
+            operandTypes.Add(op);
+            this.WritePrecedenceChar('(');
+        }
+
+        public void Dispose()
+        {
+            this.WritePrecedenceChar(')');
+            this.operandTypes.RemoveAt(this.operandTypes.Count - 1);
+        }
+
+        private void WritePrecedenceChar(char ch)
+        {
+            if (this.op != 0 && !this.CurrentHasPrecedence())
+            {
+                // The current operator does not have precedence
+                // over it's parent operator. We need to
+                // force the current operation precedence,
+                // using the given precedence opertaor.
+                this.result.Append(ch);
+            }
+        }
+
+        private bool CurrentHasPrecedence()
+        {
+            var cnt = this.operandTypes.Count;
+
+            if (cnt < 2)
+                return true;
+
+            var current = this.operandTypes[cnt - 1];
+            var parent = this.operandTypes[cnt - 2];
+
+            if (current == JavascriptOperationTypes.Call && parent == JavascriptOperationTypes.IndexerProperty)
+                return true;
+
+            if (current == JavascriptOperationTypes.TernaryCondition)
+                return JavascriptOperationTypes.TernaryCondition > parent;
+
+            return current >= parent;
+        }
+    }
+}
