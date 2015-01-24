@@ -34,7 +34,7 @@ namespace Masb.ExpressionTreeToJavascript
 
         private IDisposable Operation(Expression node)
         {
-            var op = JsOperationHelper.GetJsOperator(node.NodeType);
+            var op = JsOperationHelper.GetJsOperator(node.NodeType, node.Type);
             if (op == JavascriptOperationTypes.NoOp)
                 return null;
 
@@ -86,9 +86,7 @@ namespace Masb.ExpressionTreeToJavascript
             return node;
         }
 
-        protected override Expression VisitConstant(ConstantExpression node)
-        {
-            var numTypes = new[]
+        private static readonly Type[] numTypes = new[]
                 {
                     typeof(int),
                     typeof(long),
@@ -99,19 +97,31 @@ namespace Masb.ExpressionTreeToJavascript
                     typeof(double)
                 };
 
-            if (numTypes.Contains(node.Type))
+        private static bool IsNumericType(Type type)
+        {
+            return Array.IndexOf(numTypes, type) >= 0;
+        }
+
+        protected override Expression VisitConstant(ConstantExpression node)
+        {
+            if (IsNumericType(node.Type))
             {
-                this.result.Append(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
+                using (this.Operation(JavascriptOperationTypes.Literal))
+                    this.result.Append(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
             }
             else if (node.Type == typeof(string))
             {
-                this.WriteStringLiteral((string)node.Value);
+                using (this.Operation(JavascriptOperationTypes.Literal))
+                    this.WriteStringLiteral((string)node.Value);
             }
             else if (node.Type == typeof(Regex))
             {
-                this.result.Append('/');
-                this.result.Append(node.Value);
-                this.result.Append("/g");
+                using (this.Operation(JavascriptOperationTypes.Literal))
+                {
+                    this.result.Append('/');
+                    this.result.Append(node.Value);
+                    this.result.Append("/g");
+                }
             }
             else if (node.Value == null)
             {
@@ -336,10 +346,11 @@ namespace Masb.ExpressionTreeToJavascript
                     this.result.Append('.');
 
                 var propInfo = node.Member as PropertyInfo;
-                if (propInfo != null && node.Type == typeof(int) && node.Member.Name == "Count" &&
-                    (typeof(ICollection).IsAssignableFrom(propInfo.DeclaringType) ||
-                     propInfo.DeclaringType.IsGenericType &&
-                     typeof(ICollection<>).IsAssignableFrom(propInfo.DeclaringType.GetGenericTypeDefinition())))
+                if (propInfo != null
+                    && propInfo.DeclaringType != null
+                    && node.Type == typeof(int)
+                    && node.Member.Name == "Count"
+                    && IsListType(propInfo.DeclaringType))
                 {
                     this.result.Append("length");
                 }
@@ -586,10 +597,9 @@ namespace Masb.ExpressionTreeToJavascript
             }
             else
             {
-                if (node.Method.Name == "ContainsKey" &&
-                (typeof(IDictionary).IsAssignableFrom(node.Method.DeclaringType) ||
-                 node.Method.DeclaringType.IsGenericType &&
-                 typeof(IDictionary<,>).IsAssignableFrom(node.Method.DeclaringType.GetGenericTypeDefinition())))
+                if (node.Method.DeclaringType != null
+                    && (node.Method.Name == "ContainsKey"
+                    && IsDictionaryType(node.Method.DeclaringType)))
                 {
                     using (this.Operation(JavascriptOperationTypes.Call))
                     {
@@ -604,8 +614,97 @@ namespace Masb.ExpressionTreeToJavascript
                 }
             }
 
+            if (node.Method.DeclaringType == typeof(string))
+            {
+                if (node.Method.Name == "Contains")
+                {
+                    using (this.Operation(JavascriptOperationTypes.Comparison))
+                    {
+                        using (this.Operation(JavascriptOperationTypes.Call))
+                        {
+                            using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.result.Append(".indexOf(");
+                            using (this.Operation(0))
+                            {
+                                var posStart = this.result.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.result.Length > posStart)
+                                        this.result.Append(',');
+                                    this.Visit(arg);
+                                }
+                            }
+
+                            this.result.Append(')');
+                        }
+
+                        this.result.Append(">=0");
+                        return node;
+                    }
+                }
+            }
+
+            if (node.Method.Name == "ToString" && node.Type == typeof(string) && node.Object != null)
+            {
+                string methodName = null;
+                if (node.Arguments.Count == 0 || typeof(IFormatProvider).IsAssignableFrom(node.Arguments[0].Type))
+                {
+                    methodName = "toString()";
+                }
+                else if (IsNumericType(node.Object.Type)
+                    && node.Arguments.Count >= 1
+                    && node.Arguments[0].Type == typeof(string)
+                    && node.Arguments[0].NodeType == ExpressionType.Constant)
+                {
+                    var str = (string)((ConstantExpression)node.Arguments[0]).Value;
+                    var match = Regex.Match(str, @"^([DEFGNX])(\d*)$", RegexOptions.IgnoreCase);
+                    var f = match.Groups[1].Value.ToUpper();
+                    var n = match.Groups[2].Value;
+                    if (f == "D")
+                        methodName = "toString()";
+                    else if (f == "E")
+                        methodName = "toExponential(" + n + ")";
+                    else if (f == "F" || f == "G")
+                        methodName = "toFixed(" + n + ")";
+                    else if (f == "N")
+                        methodName = "toLocaleString()";
+                    else if (f == "X")
+                        methodName = "toString(16)";
+                }
+
+                if (methodName != null)
+                    using (this.Operation(JavascriptOperationTypes.Call))
+                    {
+                        using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                            this.Visit(node.Object);
+                        this.result.AppendFormat(".{0}", methodName);
+                        return node;
+                    }
+            }
+
             if (!node.Method.IsStatic)
                 throw new NotSupportedException("Can only convert static methods.");
+
+            if (node.Method.DeclaringType == typeof(string))
+            {
+                if (node.Method.Name == "Concat")
+                {
+                    using (this.Operation(JavascriptOperationTypes.Concat))
+                    {
+                        this.result.Append("''+");
+                        var posStart = this.result.Length;
+                        foreach (var arg in node.Arguments)
+                        {
+                            if (this.result.Length > posStart)
+                                this.result.Append('+');
+                            this.Visit(arg);
+                        }
+                    }
+
+                    return node;
+                }
+            }
 
             using (this.Operation(JavascriptOperationTypes.Call))
             {

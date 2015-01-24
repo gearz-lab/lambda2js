@@ -238,12 +238,166 @@ namespace Masb.ExpressionTreeToJavascript.Tests
             var js = expr.CompileToJavascript();
             //Assert.AreEqual(@"function(p,o){return new RegExp(p,'g'+o+'m');}", js);
         }
+
+        [TestMethod]
+        public void StringCompare1()
+        {
+            Expression<Func<Func<string, string, int>>> expr = () => ((s, b) => string.Compare(s, b));
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"function(s,b){return System.String.Compare(s,b);}", js);
+        }
+
+        [TestMethod]
+        public void StringConcat()
+        {
+            Expression<Func<MyClass, string>> expr = o => string.Concat(o.Name, ":", o.Age + 10);
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("''+Name+\":\"+(Age+10)", js);
+        }
+
+        [TestMethod]
+        public void StringConcatContains()
+        {
+            Expression<Func<MyClass, bool>> expr = o => string.Concat(o.Name, ":", o.Age + 10).Contains("30");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(''+Name+\":\"+(Age+10)).indexOf(\"30\")>=0", js);
+        }
+
+        [TestMethod]
+        public void StringContains()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.Contains("Miguel");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.indexOf(\"Miguel\")>=0", js);
+        }
+
+        [TestMethod]
+        public void StringContains2()
+        {
+            Expression<Func<MyClass, bool>> expr = o => "Miguel Angelo Santos Bicudo".Contains(o.Name);
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(\"Miguel Angelo Santos Bicudo\").indexOf(Name)>=0", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToString1()
+        {
+            Expression<Func<string>> expr = () => 1.ToString();
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toString()", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringD()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("D");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toString()", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringE()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("E");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toExponential()", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringE4()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("E4");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toExponential(4)", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringF()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("F");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toFixed()", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringF4()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("F4");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toFixed(4)", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringG()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("G");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toFixed()", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringG4()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("G4");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toFixed(4)", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringN()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("N");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toLocaleString()", js);
+        }
+
+        [TestMethod]
+        public void NumLiteralToStringX()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("X");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(1).toString(16)", js);
+        }
+
+        [TestMethod]
+        public void StringAdd1()
+        {
+            Expression<Func<MyClass, string>> expr = o => o.Name + ":" + 10;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Name+"":""+10", js);
+        }
+
+        [TestMethod]
+        public void StringAdd2()
+        {
+            Expression<Func<MyClass, string>> expr = o => o.Name + ":" + (o.Age + 10);
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Name+"":""+(Age+10)", js);
+        }
+
+        [TestMethod]
+        public void StringAdd3()
+        {
+            Expression<Func<MyClass, string>> expr = o => 1.5 + o.Name + ":" + (o.Age + 10);
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"1.5+Name+"":""+(Age+10)", js);
+        }
+
+        [TestMethod]
+        public void StringAdd4()
+        {
+            Expression<Func<MyClass, string>> expr = o => 1.5 + o.Age + ":" + o.Name;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"(1.5+Age)+"":""+Name", js);
+        }
     }
 
     class MyClass
     {
         public Phone[] Phones { get; set; }
         public Dictionary<string, Phone> PhonesByName { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
     }
 
     class Phone

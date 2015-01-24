@@ -89,6 +89,12 @@ namespace Masb.ExpressionTreeToJavascript
         AddSubtract,
 
         /// <summary>
+        /// String concatenation.
+        /// <para>op + op</para>
+        /// </summary>
+        Concat,
+
+        /// <summary>
         /// Multiply, divide and get module.
         /// <para>op * op</para>
         /// <para>op / op</para>

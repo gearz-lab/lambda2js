@@ -42,7 +42,23 @@ namespace Masb.ExpressionTreeToJavascript
         //        ExpressionType.SubtractAssignChecked,
         //    };
 
-        public static JavascriptOperationTypes GetJsOperator(ExpressionType nodeType)
+        public static bool CurrentHasPrecedence(JavascriptOperationTypes current, JavascriptOperationTypes parent)
+        {
+            if (current == JavascriptOperationTypes.Call && parent == JavascriptOperationTypes.IndexerProperty)
+                return true;
+
+            if (current == JavascriptOperationTypes.TernaryCondition)
+                return JavascriptOperationTypes.TernaryCondition > parent;
+
+            if (current == JavascriptOperationTypes.AddSubtract && parent == JavascriptOperationTypes.Concat)
+                return false;
+            if (current == JavascriptOperationTypes.Concat && parent == JavascriptOperationTypes.AddSubtract)
+                return false;
+
+            return current >= parent;
+        }
+
+        public static JavascriptOperationTypes GetJsOperator(ExpressionType nodeType, Type type)
         {
             switch (nodeType)
             {
@@ -50,6 +66,8 @@ namespace Masb.ExpressionTreeToJavascript
                 case ExpressionType.AddChecked:
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
+                    if (type == typeof(string))
+                        return JavascriptOperationTypes.Concat;
                     return JavascriptOperationTypes.AddSubtract;
 
                 case ExpressionType.And:

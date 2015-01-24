@@ -47,13 +47,7 @@ namespace Masb.ExpressionTreeToJavascript
             var current = this.operandTypes[cnt - 1];
             var parent = this.operandTypes[cnt - 2];
 
-            if (current == JavascriptOperationTypes.Call && parent == JavascriptOperationTypes.IndexerProperty)
-                return true;
-
-            if (current == JavascriptOperationTypes.TernaryCondition)
-                return JavascriptOperationTypes.TernaryCondition > parent;
-
-            return current >= parent;
+            return JsOperationHelper.CurrentHasPrecedence(current, parent);
         }
     }
 }
