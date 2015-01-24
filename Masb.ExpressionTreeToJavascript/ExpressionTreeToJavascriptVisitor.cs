@@ -336,10 +336,28 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitMember(MemberExpression node)
         {
+            if (node.Expression == null)
+            {
+                var decl = node.Member.DeclaringType;
+                if (decl == typeof(string))
+                    using (this.Operation(JavascriptOperationTypes.Literal))
+                        this.result.Append("\"\"");
+            }
+
             using (this.Operation(node))
             {
                 var pos = this.result.Length;
-                if (node.Expression != this.contextParameter)
+                if (node.Expression == null)
+                {
+                    var decl = node.Member.DeclaringType;
+                    if (decl != null)
+                    {
+                        this.result.Append(decl.FullName);
+                        this.result.Append('.');
+                        this.result.Append(decl.Name);
+                    }
+                }
+                else if (node.Expression != this.contextParameter)
                     this.Visit(node.Expression);
 
                 if (this.result.Length > pos)
