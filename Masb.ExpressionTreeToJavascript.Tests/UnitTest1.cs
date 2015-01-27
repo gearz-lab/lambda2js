@@ -80,7 +80,7 @@ namespace Masb.ExpressionTreeToJavascript.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 || x.Phones.Length != 1;
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("PhonesByName)[\"Miguel\"].DDD==32||Phones.length!=1", js);
+            Assert.AreEqual("PhonesByName[\"Miguel\"].DDD==32||Phones.length!=1", js);
         }
 
         [TestMethod]

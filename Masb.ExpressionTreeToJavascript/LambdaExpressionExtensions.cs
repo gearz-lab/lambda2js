@@ -7,13 +7,19 @@ namespace Masb.ExpressionTreeToJavascript
 {
     public static class LambdaExpressionExtensions
     {
-        public static string CompileToJavascript([NotNull] this LambdaExpression expr, bool bodyOnly = true)
+        public static string CompileToJavascript([NotNull] this LambdaExpression expr, JavascriptCompilationOptions options = null)
         {
             if (expr == null)
                 throw new ArgumentNullException("expr");
 
-            var visitor = new ExpressionTreeToJavascriptVisitor(expr.Parameters.FirstOrDefault());
-            visitor.Visit(bodyOnly ? expr.Body : expr);
+            options = options ?? JavascriptCompilationOptions.DefaultOptions;
+
+            var visitor =
+                new JavascriptCompilerExpressionVisitor(
+                    options.ScopeParameter ? expr.Parameters.SingleOrDefault() : null,
+                    options.Extensions);
+
+            visitor.Visit(options.BodyOnly ? expr.Body : expr);
             return visitor.Result;
         }
     }

@@ -1,25 +1,27 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace Masb.ExpressionTreeToJavascript
 {
-    public class ExpressionTreeToJavascriptVisitor : ExpressionVisitor
+    public class JavascriptCompilerExpressionVisitor : ExpressionVisitor
     {
         private readonly ParameterExpression contextParameter;
-        private readonly StringBuilder result = new StringBuilder();
-        private readonly List<JavascriptOperationTypes> operandTypes = new List<JavascriptOperationTypes>();
+        private readonly IEnumerable<JavascriptConversionExtension> extensions;
+        private readonly JavascriptWriter result = new JavascriptWriter();
 
-        public ExpressionTreeToJavascriptVisitor(ParameterExpression contextParameter)
+        public JavascriptCompilerExpressionVisitor(
+            ParameterExpression contextParameter,
+            IEnumerable<JavascriptConversionExtension> extensions)
         {
             this.contextParameter = contextParameter;
+            this.extensions = extensions;
         }
 
         public string Result
@@ -27,22 +29,31 @@ namespace Masb.ExpressionTreeToJavascript
             get { return this.result.ToString(); }
         }
 
-        private PrecedenceController Operation(JavascriptOperationTypes op)
-        {
-            return new PrecedenceController(this.result, this.operandTypes, op);
-        }
-
-        private IDisposable Operation(Expression node)
-        {
-            var op = JsOperationHelper.GetJsOperator(node.NodeType, node.Type);
-            if (op == JavascriptOperationTypes.NoOp)
-                return null;
-
-            return new PrecedenceController(this.result, this.operandTypes, op);
-        }
-
         public override Expression Visit(Expression node)
         {
+            var context = new JavascriptConversionContext(node, this, this.result);
+            foreach (var each in this.extensions)
+            {
+                each.ConvertToJavascript(context);
+
+                if (context.gotWriter && context.Node != node)
+                    throw new Exception(
+                        "Cannot both write and return a new node. Either write javascript code, or return a new node.");
+
+                if (context.preventDefault || context.gotWriter)
+                {
+                    // canceling any further action with the current node
+                    return node;
+                }
+
+                if (context.Node != node)
+                {
+                    // a new node must be completelly revisited
+                    return this.Visit(context.Node);
+                }
+            }
+
+            // nothing happened, continue to the default conversion behavior
             return base.Visit(node);
         }
 
@@ -50,21 +61,21 @@ namespace Masb.ExpressionTreeToJavascript
         {
             if (node.NodeType == ExpressionType.ArrayIndex)
             {
-                using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                 {
                     this.Visit(node.Left);
                     this.result.Append('[');
-                    using (this.Operation(0))
+                    using (this.result.Operation(0))
                         this.Visit(node.Right);
                     this.result.Append(']');
                     return node;
                 }
             }
 
-            using (this.Operation(node))
+            using (this.result.Operation(node))
             {
                 this.Visit(node.Left);
-                JsOperationHelper.WriteOperator(this.result, node.NodeType);
+                this.result.WriteOperator(node.NodeType);
                 this.Visit(node.Right);
             }
 
@@ -86,37 +97,21 @@ namespace Masb.ExpressionTreeToJavascript
             return node;
         }
 
-        private static readonly Type[] numTypes = new[]
-                {
-                    typeof(int),
-                    typeof(long),
-                    typeof(uint),
-                    typeof(ulong),
-                    typeof(short),
-                    typeof(byte),
-                    typeof(double)
-                };
-
-        private static bool IsNumericType(Type type)
-        {
-            return Array.IndexOf(numTypes, type) >= 0;
-        }
-
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            if (IsNumericType(node.Type))
+            if (TypeHelpers.IsNumericType(node.Type))
             {
-                using (this.Operation(JavascriptOperationTypes.Literal))
+                using (this.result.Operation(JavascriptOperationTypes.Literal))
                     this.result.Append(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
             }
             else if (node.Type == typeof(string))
             {
-                using (this.Operation(JavascriptOperationTypes.Literal))
+                using (this.result.Operation(JavascriptOperationTypes.Literal))
                     this.WriteStringLiteral((string)node.Value);
             }
             else if (node.Type == typeof(Regex))
             {
-                using (this.Operation(JavascriptOperationTypes.Literal))
+                using (this.result.Operation(JavascriptOperationTypes.Literal))
                 {
                     this.result.Append('/');
                     this.result.Append(node.Value);
@@ -141,6 +136,7 @@ namespace Masb.ExpressionTreeToJavascript
                     .Replace("\t", "\\t")
                     .Replace("\0", "\\0")
                     .Replace("\"", "\\\""));
+
             this.result.Append('"');
         }
 
@@ -196,7 +192,7 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitLambda<T>(Expression<T> node)
         {
-            using (this.Operation(node))
+            using (this.result.Operation(node))
             {
                 this.result.Append("function(");
 
@@ -214,7 +210,7 @@ namespace Masb.ExpressionTreeToJavascript
 
                 this.result.Append("){");
                 if (node.ReturnType != typeof(void))
-                    using (this.Operation(0))
+                    using (this.result.Operation(0))
                     {
                         this.result.Append("return ");
                         this.Visit(node.Body);
@@ -225,48 +221,12 @@ namespace Masb.ExpressionTreeToJavascript
             }
         }
 
-        private static bool IsDictionaryType([NotNull] Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
-            if (typeof(IDictionary).IsAssignableFrom(type))
-                return true;
-
-            if (type.IsGenericType)
-            {
-                var generic = type.GetGenericTypeDefinition();
-                if (typeof(IDictionary<,>).IsAssignableFrom(generic))
-                    return true;
-            }
-
-            return false;
-        }
-
-        private static bool IsListType([NotNull] Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
-            if (typeof(ICollection).IsAssignableFrom(type))
-                return true;
-
-            if (type.IsGenericType)
-            {
-                var generic = type.GetGenericTypeDefinition();
-                if (typeof(ICollection<>).IsAssignableFrom(generic))
-                    return true;
-            }
-
-            return false;
-        }
-
         protected override Expression VisitListInit(ListInitExpression node)
         {
             // Detecting a new dictionary
-            if (IsDictionaryType(node.Type))
+            if (TypeHelpers.IsDictionaryType(node.Type))
             {
-                using (this.Operation(0))
+                using (this.result.Operation(0))
                 {
                     this.result.Append('{');
 
@@ -301,9 +261,9 @@ namespace Masb.ExpressionTreeToJavascript
             }
 
             // Detecting a new dictionary
-            if (IsListType(node.Type))
+            if (TypeHelpers.IsListType(node.Type))
             {
-                using (this.Operation(0))
+                using (this.result.Operation(0))
                 {
                     this.result.Append('[');
 
@@ -340,11 +300,17 @@ namespace Masb.ExpressionTreeToJavascript
             {
                 var decl = node.Member.DeclaringType;
                 if (decl == typeof(string))
-                    using (this.Operation(JavascriptOperationTypes.Literal))
-                        this.result.Append("\"\"");
+                {
+                    if (node.Member.Name == "Empty")
+                    {
+                        using (this.result.Operation(JavascriptOperationTypes.Literal))
+                            this.result.Append("\"\"");
+                        return node;
+                    }
+                }
             }
 
-            using (this.Operation(node))
+            using (this.result.Operation(node))
             {
                 var pos = this.result.Length;
                 if (node.Expression == null)
@@ -368,7 +334,7 @@ namespace Masb.ExpressionTreeToJavascript
                     && propInfo.DeclaringType != null
                     && node.Type == typeof(int)
                     && node.Member.Name == "Count"
-                    && IsListType(propInfo.DeclaringType))
+                    && TypeHelpers.IsListType(propInfo.DeclaringType))
                 {
                     this.result.Append("length");
                 }
@@ -388,15 +354,15 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            using (this.Operation(node))
+            using (this.result.Operation(node))
             {
                 var isPostOp = JsOperationHelper.IsPostfixOperator(node.NodeType);
 
                 if (!isPostOp)
-                    JsOperationHelper.WriteOperator(this.result, node.NodeType);
+                    this.result.WriteOperator(node.NodeType);
                 this.Visit(node.Operand);
                 if (isPostOp)
-                    JsOperationHelper.WriteOperator(this.result, node.NodeType);
+                    this.result.WriteOperator(node.NodeType);
 
                 return node;
             }
@@ -435,7 +401,7 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitNewArray(NewArrayExpression node)
         {
-            using (this.Operation(0))
+            using (this.result.Operation(0))
             {
                 this.result.Append('[');
 
@@ -456,10 +422,11 @@ namespace Masb.ExpressionTreeToJavascript
 
         protected override Expression VisitNew(NewExpression node)
         {
-            // Detecting inline objects
+            // Detecting inlineable objects
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (node.Members != null && node.Members.Count > 0)
             {
-                using (this.Operation(0))
+                using (this.result.Operation(0))
                 {
                     this.result.Append('{');
 
@@ -515,11 +482,11 @@ namespace Masb.ExpressionTreeToJavascript
                 }
                 else
                 {
-                    using (this.Operation(JavascriptOperationTypes.New))
+                    using (this.result.Operation(JavascriptOperationTypes.New))
                     {
                         this.result.Append("new RegExp(");
 
-                        using (this.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
+                        using (this.result.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
                             this.Visit(node.Arguments[0]);
 
                         var args = node.Arguments.Count;
@@ -557,12 +524,12 @@ namespace Masb.ExpressionTreeToJavascript
             {
                 if (node.Method.Name == "get_Item")
                 {
-                    using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                    using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                     {
                         this.Visit(node.Object);
                         this.result.Append('[');
 
-                        using (this.Operation(0))
+                        using (this.result.Operation(0))
                         {
                             var posStart0 = this.result.Length;
                             foreach (var arg in node.Arguments)
@@ -581,16 +548,16 @@ namespace Masb.ExpressionTreeToJavascript
 
                 if (node.Method.Name == "set_Item")
                 {
-                    using (this.Operation(0))
+                    using (this.result.Operation(0))
                     {
-                        using (this.Operation(JavascriptOperationTypes.AssignRhs))
+                        using (this.result.Operation(JavascriptOperationTypes.AssignRhs))
                         {
-                            using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                            using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                             {
                                 this.Visit(node.Object);
                                 this.result.Append('[');
 
-                                using (this.Operation(0))
+                                using (this.result.Operation(0))
                                 {
                                     var posStart0 = this.result.Length;
                                     foreach (var arg in node.Arguments)
@@ -617,14 +584,14 @@ namespace Masb.ExpressionTreeToJavascript
             {
                 if (node.Method.DeclaringType != null
                     && (node.Method.Name == "ContainsKey"
-                    && IsDictionaryType(node.Method.DeclaringType)))
+                        && TypeHelpers.IsDictionaryType(node.Method.DeclaringType)))
                 {
-                    using (this.Operation(JavascriptOperationTypes.Call))
+                    using (this.result.Operation(JavascriptOperationTypes.Call))
                     {
-                        using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                        using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                             this.Visit(node.Object);
                         this.result.Append(".hasOwnProperty(");
-                        using (this.Operation(0))
+                        using (this.result.Operation(0))
                             this.Visit(node.Arguments.Single());
                         this.result.Append(')');
                         return node;
@@ -636,14 +603,14 @@ namespace Masb.ExpressionTreeToJavascript
             {
                 if (node.Method.Name == "Contains")
                 {
-                    using (this.Operation(JavascriptOperationTypes.Comparison))
+                    using (this.result.Operation(JavascriptOperationTypes.Comparison))
                     {
-                        using (this.Operation(JavascriptOperationTypes.Call))
+                        using (this.result.Operation(JavascriptOperationTypes.Call))
                         {
-                            using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                            using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                                 this.Visit(node.Object);
                             this.result.Append(".indexOf(");
-                            using (this.Operation(0))
+                            using (this.result.Operation(0))
                             {
                                 var posStart = this.result.Length;
                                 foreach (var arg in node.Arguments)
@@ -670,10 +637,10 @@ namespace Masb.ExpressionTreeToJavascript
                 {
                     methodName = "toString()";
                 }
-                else if (IsNumericType(node.Object.Type)
-                    && node.Arguments.Count >= 1
-                    && node.Arguments[0].Type == typeof(string)
-                    && node.Arguments[0].NodeType == ExpressionType.Constant)
+                else if (TypeHelpers.IsNumericType(node.Object.Type)
+                         && node.Arguments.Count >= 1
+                         && node.Arguments[0].Type == typeof(string)
+                         && node.Arguments[0].NodeType == ExpressionType.Constant)
                 {
                     var str = (string)((ConstantExpression)node.Arguments[0]).Value;
                     var match = Regex.Match(str, @"^([DEFGNX])(\d*)$", RegexOptions.IgnoreCase);
@@ -692,9 +659,9 @@ namespace Masb.ExpressionTreeToJavascript
                 }
 
                 if (methodName != null)
-                    using (this.Operation(JavascriptOperationTypes.Call))
+                    using (this.result.Operation(JavascriptOperationTypes.Call))
                     {
-                        using (this.Operation(JavascriptOperationTypes.IndexerProperty))
+                        using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                             this.Visit(node.Object);
                         this.result.AppendFormat(".{0}", methodName);
                         return node;
@@ -704,47 +671,30 @@ namespace Masb.ExpressionTreeToJavascript
             if (!node.Method.IsStatic)
                 throw new NotSupportedException("Can only convert static methods.");
 
-            if (node.Method.DeclaringType == typeof(string))
-            {
-                if (node.Method.Name == "Concat")
+            using (this.result.Operation(JavascriptOperationTypes.Call))
+                if (node.Method.DeclaringType != null)
                 {
-                    using (this.Operation(JavascriptOperationTypes.Concat))
-                    {
-                        this.result.Append("''+");
-                        var posStart = this.result.Length;
+                    this.result.Append(node.Method.DeclaringType.FullName);
+                    this.result.Append('.');
+                    this.result.Append(node.Method.Name);
+                    this.result.Append('(');
+
+                    var posStart = this.result.Length;
+                    using (this.result.Operation(0))
                         foreach (var arg in node.Arguments)
                         {
-                            if (this.result.Length > posStart)
-                                this.result.Append('+');
+                            if (this.result.Length != posStart)
+                                this.result.Append(',');
+
                             this.Visit(arg);
                         }
-                    }
+
+                    this.result.Append(')');
 
                     return node;
                 }
-            }
 
-            using (this.Operation(JavascriptOperationTypes.Call))
-            {
-                this.result.Append(node.Method.DeclaringType.FullName);
-                this.result.Append('.');
-                this.result.Append(node.Method.Name);
-                this.result.Append('(');
-
-                var posStart = this.result.Length;
-                using (this.Operation(0))
-                    foreach (var arg in node.Arguments)
-                    {
-                        if (this.result.Length != posStart)
-                            this.result.Append(',');
-
-                        this.Visit(arg);
-                    }
-
-                this.result.Append(')');
-
-                return node;
-            }
+            return node;
         }
 
         protected override MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding node)
@@ -765,6 +715,84 @@ namespace Masb.ExpressionTreeToJavascript
         protected override MemberBinding VisitMemberBinding(MemberBinding node)
         {
             return node;
+        }
+    }
+
+    internal static class TypeHelpers
+    {
+        private static readonly Type[] numTypes = new[]
+            {
+                typeof(short),
+                typeof(int),
+                typeof(long),
+                typeof(ushort),
+                typeof(uint),
+                typeof(ulong),
+                typeof(short),
+                typeof(byte),
+                typeof(sbyte),
+                typeof(float),
+                typeof(double),
+                typeof(decimal)
+            };
+
+        public static bool IsNumericType(Type type)
+        {
+            return Array.IndexOf(numTypes, type) >= 0;
+        }
+
+        public static bool IsDictionaryType([NotNull] Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (typeof(IDictionary).IsAssignableFrom(type))
+                return true;
+
+            if (type.IsGenericType)
+            {
+                var generic = type.GetGenericTypeDefinition();
+                if (typeof(IDictionary<,>).IsAssignableFrom(generic))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsListType([NotNull] Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (typeof(ICollection).IsAssignableFrom(type))
+                return true;
+
+            if (type.IsGenericType)
+            {
+                var generic = type.GetGenericTypeDefinition();
+                if (typeof(ICollection<>).IsAssignableFrom(generic))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsEnumerableType(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (typeof(IEnumerable).IsAssignableFrom(type))
+                return true;
+
+            if (type.IsGenericType)
+            {
+                var generic = type.GetGenericTypeDefinition();
+                if (typeof(IEnumerable<>).IsAssignableFrom(generic))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

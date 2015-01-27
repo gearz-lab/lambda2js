@@ -1,0 +1,28 @@
+﻿<#@ template language="C#" debug="false" hostspecific="true"#>
+<#@ output extension=".cs"#>
+<#@ include file="GenericBuilderGen.ttinclude"#>
+using System.Linq.Expressions;
+<#
+	BaseTypeName = "ComponentEntry";
+	GenericTypeName = "ComponentEntry";
+	BuilderTypeName = "ComponentEntryBuilder";
+	TypeParameters = new[] {
+			new Parameter("T", "type"),
+		};
+	Constructors = new[] {
+			// ctor(Option<T> value)
+			new Constructor(new[] {
+				new Parameter("object", "value", castExpression: "(Option<T>)(T)"),
+			}),
+			// ctor(Func<T> getter)
+			new Constructor(new[] {
+				new Parameter("Delegate", "getter", castExpression: "(Func<T>)"),
+			}),
+			// ctor(Expression<Func<T>> expression)
+			new Constructor(new[] {
+				new Parameter("Expression", "expression", castExpression: "(Expression<Func<T>>)"),
+			}),
+		};
+
+	RenderBody();
+#>

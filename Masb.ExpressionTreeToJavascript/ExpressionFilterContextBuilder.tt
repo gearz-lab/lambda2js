@@ -1,0 +1,25 @@
+﻿<#@ template language="C#" debug="false" hostspecific="true"#>
+<#@ output extension=".cs"#>
+<#@ include file="GenericBuilderGen.ttinclude"#>
+<#
+	BaseTypeName = "ExpressionFilterContext";
+	GenericTypeName = "ExpressionFilterContext";
+	BuilderTypeName = "ExpressionFilterContextBuilder";
+	TypeParameters = new[] {
+			new Parameter("TComponent", "componentType"),
+		};
+	Constructors = new[] {
+			// ctor(ExpressionComposer composer)
+			new Constructor(new[] {
+				new Parameter("ExpressionComposer", "composer"),
+			}),
+			// ctor(ExpressionFilterContext parentContext, string componentName, object reflectedDestinationInfo)
+			new Constructor(new[] {
+				new Parameter("CompositionContext", "parentContext"),
+				new Parameter("string", "componentName"),
+				new Parameter("object", "reflectedDestinationInfo"),
+			}),
+		};
+
+	RenderBody();
+#>
