@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Masb.ExpressionTreeToJavascript.Tests")]
+[assembly: AssemblyTitle("Lambda2Js.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hewlett-Packard")]
-[assembly: AssemblyProduct("Masb.ExpressionTreeToJavascript.Tests")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2015")]
+[assembly: AssemblyCompany("Lambda2Js")]
+[assembly: AssemblyProduct("Lambda2Js.Tests")]
+[assembly: AssemblyCopyright("Copyright © Lambda2Js 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

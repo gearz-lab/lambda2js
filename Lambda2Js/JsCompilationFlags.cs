@@ -1,6 +1,6 @@
 using System;
 
-namespace Masb.ExpressionTreeToJavascript
+namespace Lambda2Js
 {
     [Flags]
     public enum JsCompilationFlags

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Masb.ExpressionTreeToJavascript.Tests
+namespace Lambda2Js.Tests
 {
     [TestClass]
     public class UnitTest1

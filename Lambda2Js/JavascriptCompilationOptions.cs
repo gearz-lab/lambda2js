@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace Masb.ExpressionTreeToJavascript
+namespace Lambda2Js
 {
     public class JavascriptCompilationOptions
     {

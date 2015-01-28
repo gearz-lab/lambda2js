@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Masb.ExpressionTreeToJavascript.Tests
+namespace Lambda2Js.Tests
 {
     [TestClass]
     public class StaticStringMethodTests

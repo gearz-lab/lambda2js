@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
-namespace Masb.ExpressionTreeToJavascript
+namespace Lambda2Js
 {
     public class JavascriptCompilerExpressionVisitor : ExpressionVisitor
     {

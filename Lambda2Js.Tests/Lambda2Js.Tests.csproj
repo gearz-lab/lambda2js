@@ -6,8 +6,8 @@
     <ProjectGuid>{728483B9-73EA-4EF6-94CC-22D1E5053A29}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Masb.ExpressionTreeToJavascript.Tests</RootNamespace>
-    <AssemblyName>Masb.ExpressionTreeToJavascript.Tests</AssemblyName>
+    <RootNamespace>Lambda2Js.Tests</RootNamespace>
+    <AssemblyName>Lambda2Js.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,9 +55,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Masb.ExpressionTreeToJavascript\Masb.ExpressionTreeToJavascript.csproj">
+    <ProjectReference Include="..\Lambda2Js\Lambda2Js.csproj">
       <Project>{f7221282-1169-475b-bf81-e3ec2ff6a00a}</Project>
-      <Name>Masb.ExpressionTreeToJavascript</Name>
+      <Name>Lambda2Js</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

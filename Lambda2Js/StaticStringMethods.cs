@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Masb.ExpressionTreeToJavascript
+namespace Lambda2Js
 {
     public class StaticStringMethods : JavascriptConversionExtension
     {

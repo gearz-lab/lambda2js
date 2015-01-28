@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace Masb.ExpressionTreeToJavascript
+namespace Lambda2Js
 {
     public class JavascriptWriter
     {

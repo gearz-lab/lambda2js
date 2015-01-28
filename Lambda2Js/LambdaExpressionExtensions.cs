@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
 
-namespace Masb.ExpressionTreeToJavascript
+namespace Lambda2Js
 {
     public static class LambdaExpressionExtensions
     {

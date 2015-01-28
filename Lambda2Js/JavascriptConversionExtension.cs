@@ -1,4 +1,4 @@
-﻿namespace Masb.ExpressionTreeToJavascript
+﻿namespace Lambda2Js
 {
     public abstract class JavascriptConversionExtension
     {

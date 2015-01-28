@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using JetBrains.Annotations;
 
-namespace Masb.ExpressionTreeToJavascript
+namespace Lambda2Js
 {
     public class JavascriptConversionContext
     {
