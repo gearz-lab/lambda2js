@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Lambda2Js")]
+[assembly: AssemblyTitle("lambda2js (ExpressionTree to JavaScript)")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Lambda2Js")]
+[assembly: AssemblyCompany("Gearz")]
 [assembly: AssemblyProduct("Lambda2Js")]
-[assembly: AssemblyCopyright("Copyright © Lambda2Js 2015")]
+[assembly: AssemblyCopyright("Copyright © Gearz 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
