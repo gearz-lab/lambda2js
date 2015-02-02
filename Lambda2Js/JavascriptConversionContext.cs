@@ -32,6 +32,14 @@ namespace Lambda2Js
             this.node = node;
         }
 
+        /// <summary>
+        /// Gets the node being converted.
+        /// [Do not set this property, as the setter will be soon removed. See remarks for alternatives.]
+        /// </summary>
+        /// <remarks>
+        /// The preferred way to process another node, instead of setting this property,
+        /// is calling either `WriteLambda` or `WriteExpression` method.
+        /// </remarks>
         [NotNull]
         public Expression Node
         {
@@ -39,13 +47,16 @@ namespace Lambda2Js
             {
                 return this.node;
             }
-
+            #region Supported will be removed in v2
+#if V1
             set
             {
                 if (value == null)
                     throw new ArgumentNullException("value");
                 this.node = value;
             }
+#endif
+            #endregion
         }
 
         public void PreventDefault()
