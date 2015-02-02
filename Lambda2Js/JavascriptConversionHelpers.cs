@@ -5,14 +5,29 @@ using JetBrains.Annotations;
 
 namespace Lambda2Js
 {
+    /// <summary>
+    /// Extension methods to help with the JavaScript rendering, when implementing <see cref="JavascriptConversionExtension"/>.
+    /// </summary>
     public static class JavascriptConversionHelpers
     {
+        /// <summary>
+        /// Writes many expression nodes, separated by the given separator.
+        /// </summary>
+        /// <param name="context">The Javascript conversion context.</param>
+        /// <param name="node">The node to write.</param>
+        /// <returns>The Javascript conversion context itself, to allow fluent style rendering.</returns>
         public static JavascriptConversionContext Write(this JavascriptConversionContext context, Expression node)
         {
             context.Visitor.Visit(node);
             return context;
         }
 
+        /// <summary>
+        /// Writes a single character.
+        /// </summary>
+        /// <param name="context">The Javascript conversion context.</param>
+        /// <param name="ch">Character to write.</param>
+        /// <returns>The Javascript conversion context itself, to allow fluent style rendering.</returns>
         public static JavascriptConversionContext Write(this JavascriptConversionContext context, char ch)
         {
             var writer = context.GetWriter();
@@ -20,6 +35,13 @@ namespace Lambda2Js
             return context;
         }
 
+        /// <summary>
+        /// Writes many expression nodes, separated by the given separator.
+        /// </summary>
+        /// <param name="context">The Javascript conversion context.</param>
+        /// <param name="separator">Separator to be used.</param>
+        /// <param name="nodes">A list of nodes to write.</param>
+        /// <returns>The Javascript conversion context itself, to allow fluent style rendering.</returns>
         public static JavascriptConversionContext WriteMany(
             this JavascriptConversionContext context,
             char separator,
@@ -37,6 +59,13 @@ namespace Lambda2Js
             return context;
         }
 
+        /// <summary>
+        /// Writes many expression nodes, separated by the given separator.
+        /// </summary>
+        /// <param name="context">The Javascript conversion context.</param>
+        /// <param name="separator">Separator to be used.</param>
+        /// <param name="nodes">A list of nodes to write.</param>
+        /// <returns>The Javascript conversion context itself, to allow fluent style rendering.</returns>
         public static JavascriptConversionContext WriteMany(
             this JavascriptConversionContext context,
             char separator,
@@ -86,6 +115,22 @@ namespace Lambda2Js
             return WriteManyIsolated(context, opening, closing, separator, (IEnumerable<Expression>)nodes);
         }
 
+        /// <summary>
+        /// Encloses the following write calls in an operation context,
+        /// that will automatically write precedence operators '(' and ')' if needed,
+        /// depening on the operations stack.
+        /// <para>
+        /// For example, a sum (+)
+        /// inside a multiplication (*) requires the precedence operators.
+        /// </para>
+        /// <para>
+        /// To isolate operations, you can pass 0 to the <paramref name="op"/> parameter,
+        /// making neither the current nor the inner operation need precedence operators.
+        /// </para>
+        /// </summary>
+        /// <param name="context">Context of the conversion.</param>
+        /// <param name="op">The operation that you want to render in the scope.</param>
+        /// <returns>A disposable object that renders the ending ')' when needed.</returns>
         public static IDisposable Operation(
             this JavascriptConversionContext context,
             JavascriptOperationTypes op)
@@ -93,12 +138,25 @@ namespace Lambda2Js
             return context.GetWriter().Operation(op);
         }
 
+        /// <summary>
+        /// Writes a string to the output.
+        /// </summary>
+        /// <param name="context">The Javascript conversion context.</param>
+        /// <param name="str">String to write.</param>
+        /// <returns>The Javascript conversion context itself, to allow fluent style rendering.</returns>
         public static JavascriptConversionContext Write(this JavascriptConversionContext context, string str)
         {
             context.GetWriter().Write(str);
             return context;
         }
 
+        /// <summary>
+        /// Writes a formatted string to the output.
+        /// </summary>
+        /// <param name="context">The Javascript conversion context.</param>
+        /// <param name="format">A string with place-holders to be filled with the values.</param>
+        /// <param name="values">A list values to use in each place-holder.</param>
+        /// <returns>The Javascript conversion context itself, to allow fluent style rendering.</returns>
         [StringFormatMethod("format")]
         public static JavascriptConversionContext WriteFormat(this JavascriptConversionContext context, string format, params object[] values)
         {

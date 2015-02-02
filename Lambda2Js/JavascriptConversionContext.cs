@@ -34,7 +34,7 @@ namespace Lambda2Js
 
         /// <summary>
         /// Gets the node being converted.
-        /// [Do not set this property, as the setter will be soon removed. See remarks for alternatives.]
+        /// [Do not set this property, as the setter will be soon removed. Use either `WriteLambda` or `WriteExpression` method.]
         /// </summary>
         /// <remarks>
         /// The preferred way to process another node, instead of setting this property,
