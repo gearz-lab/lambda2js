@@ -10,7 +10,8 @@ namespace Lambda2Js
         protected static Type GetTypeOfExpression(Expression expression)
         {
             if (expression.NodeType == ExpressionType.Convert || expression.NodeType == ExpressionType.ConvertChecked)
-                return ((UnaryExpression)expression).Operand.Type;
+                if (expression.Type.IsAssignableFrom(((UnaryExpression)expression).Operand.Type))
+                    return GetTypeOfExpression(((UnaryExpression)expression).Operand);
             return expression.Type;
         }
     }
