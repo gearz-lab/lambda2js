@@ -18,8 +18,14 @@ namespace Lambda2Js
                                 var writer = context.GetWriter();
                                 using (writer.Operation(JavascriptOperationTypes.Concat))
                                 {
-                                    writer.Write("''+");
-                                    context.WriteMany('+', methodCall.Arguments);
+                                    if (methodCall.Arguments.Count == 0)
+                                        writer.Write("''");
+                                    else
+                                    {
+                                        if (GetTypeOfExpression(methodCall.Arguments[0]) != typeof(string))
+                                            writer.Write("''+");
+                                        context.WriteMany('+', methodCall.Arguments);
+                                    }
                                 }
 
                                 return;

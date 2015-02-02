@@ -17,7 +17,20 @@ namespace Lambda2Js.Tests
                     JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
                     new[] { new StaticStringMethods() }));
 
-            Assert.AreEqual("''+\"A\"+\"B\"", js);
+            Assert.AreEqual("\"A\"+\"B\"", js);
+        }
+
+        [TestMethod]
+        public void StringConcat1()
+        {
+            Expression<Func<MyClass, string>> expr = o => string.Concat(1, 2);
+
+            var js = expr.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
+                    new[] { new StaticStringMethods() }));
+
+            Assert.AreEqual("''+1+2", js);
         }
 
         [TestMethod]
@@ -65,7 +78,7 @@ namespace Lambda2Js.Tests
                     JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
                     new[] { new StaticStringMethods() }));
 
-            Assert.AreEqual("''+Name+\":\"+(Age+10)", js);
+            Assert.AreEqual("Name+\":\"+(Age+10)", js);
         }
 
         [TestMethod]
@@ -78,7 +91,20 @@ namespace Lambda2Js.Tests
                     JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
                     new[] { new StaticStringMethods() }));
 
-            Assert.AreEqual("(''+Name+\":\"+(Age+10)).indexOf(\"30\")>=0", js);
+            Assert.AreEqual("(Name+\":\"+(Age+10)).indexOf(\"30\")>=0", js);
+        }
+
+        [TestMethod]
+        public void StringConcat2()
+        {
+            Expression<Func<MyClass, string>> expr = o => string.Concat(10, ":", 20);
+
+            var js = expr.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
+                    new[] { new StaticStringMethods() }));
+
+            Assert.AreEqual("''+10+\":\"+20", js);
         }
     }
 }
