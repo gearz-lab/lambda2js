@@ -64,10 +64,10 @@ namespace Lambda2Js
                 using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                 {
                     this.Visit(node.Left);
-                    this.result.Append('[');
+                    this.result.Write('[');
                     using (this.result.Operation(0))
                         this.Visit(node.Right);
-                    this.result.Append(']');
+                    this.result.Write(']');
                     return node;
                 }
             }
@@ -102,7 +102,7 @@ namespace Lambda2Js
             if (TypeHelpers.IsNumericType(node.Type))
             {
                 using (this.result.Operation(JavascriptOperationTypes.Literal))
-                    this.result.Append(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
+                    this.result.Write(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
             }
             else if (node.Type == typeof(string))
             {
@@ -113,14 +113,14 @@ namespace Lambda2Js
             {
                 using (this.result.Operation(JavascriptOperationTypes.Literal))
                 {
-                    this.result.Append('/');
-                    this.result.Append(node.Value);
-                    this.result.Append("/g");
+                    this.result.Write('/');
+                    this.result.Write(node.Value);
+                    this.result.Write("/g");
                 }
             }
             else if (node.Value == null)
             {
-                this.result.Append("null");
+                this.result.Write("null");
             }
 
             return node;
@@ -128,8 +128,8 @@ namespace Lambda2Js
 
         private void WriteStringLiteral(string str)
         {
-            this.result.Append('"');
-            this.result.Append(
+            this.result.Write('"');
+            this.result.Write(
                 str
                     .Replace("\r", "\\r")
                     .Replace("\n", "\\n")
@@ -137,7 +137,7 @@ namespace Lambda2Js
                     .Replace("\0", "\\0")
                     .Replace("\"", "\\\""));
 
-            this.result.Append('"');
+            this.result.Write('"');
         }
 
         protected override Expression VisitDebugInfo(DebugInfoExpression node)
@@ -194,7 +194,7 @@ namespace Lambda2Js
         {
             using (this.result.Operation(node))
             {
-                this.result.Append("function(");
+                this.result.Write("function(");
 
                 var posStart = this.result.Length;
                 foreach (var param in node.Parameters)
@@ -203,20 +203,20 @@ namespace Lambda2Js
                         throw new NotSupportedException("Cannot pass by ref in javascript.");
 
                     if (this.result.Length > posStart)
-                        this.result.Append(',');
+                        this.result.Write(',');
 
-                    this.result.Append(param.Name);
+                    this.result.Write(param.Name);
                 }
 
-                this.result.Append("){");
+                this.result.Write("){");
                 if (node.ReturnType != typeof(void))
                     using (this.result.Operation(0))
                     {
-                        this.result.Append("return ");
+                        this.result.Write("return ");
                         this.Visit(node.Body);
                     }
 
-                this.result.Append(";}");
+                this.result.Write(";}");
                 return node;
             }
         }
@@ -228,13 +228,13 @@ namespace Lambda2Js
             {
                 using (this.result.Operation(0))
                 {
-                    this.result.Append('{');
+                    this.result.Write('{');
 
                     var posStart = this.result.Length;
                     foreach (var init in node.Initializers)
                     {
                         if (this.result.Length > posStart)
-                            this.result.Append(',');
+                            this.result.Write(',');
 
                         if (init.Arguments.Count != 2)
                             throw new NotSupportedException(
@@ -246,15 +246,15 @@ namespace Lambda2Js
 
                         var name = (string)((ConstantExpression)nameArg).Value;
                         if (Regex.IsMatch(name, @"^\w[\d\w]*$"))
-                            this.result.Append(name);
+                            this.result.Write(name);
                         else
                             this.WriteStringLiteral(name);
 
-                        this.result.Append(':');
+                        this.result.Write(':');
                         this.Visit(init.Arguments[1]);
                     }
 
-                    this.result.Append('}');
+                    this.result.Write('}');
                 }
 
                 return node;
@@ -265,13 +265,13 @@ namespace Lambda2Js
             {
                 using (this.result.Operation(0))
                 {
-                    this.result.Append('[');
+                    this.result.Write('[');
 
                     var posStart = this.result.Length;
                     foreach (var init in node.Initializers)
                     {
                         if (this.result.Length > posStart)
-                            this.result.Append(',');
+                            this.result.Write(',');
 
                         if (init.Arguments.Count != 1)
                             throw new Exception(
@@ -280,7 +280,7 @@ namespace Lambda2Js
                         this.Visit(init.Arguments[0]);
                     }
 
-                    this.result.Append(']');
+                    this.result.Write(']');
                 }
 
                 return node;
@@ -304,7 +304,7 @@ namespace Lambda2Js
                     if (node.Member.Name == "Empty")
                     {
                         using (this.result.Operation(JavascriptOperationTypes.Literal))
-                            this.result.Append("\"\"");
+                            this.result.Write("\"\"");
                         return node;
                     }
                 }
@@ -318,16 +318,16 @@ namespace Lambda2Js
                     var decl = node.Member.DeclaringType;
                     if (decl != null)
                     {
-                        this.result.Append(decl.FullName);
-                        this.result.Append('.');
-                        this.result.Append(decl.Name);
+                        this.result.Write(decl.FullName);
+                        this.result.Write('.');
+                        this.result.Write(decl.Name);
                     }
                 }
                 else if (node.Expression != this.contextParameter)
                     this.Visit(node.Expression);
 
                 if (this.result.Length > pos)
-                    this.result.Append('.');
+                    this.result.Write('.');
 
                 var propInfo = node.Member as PropertyInfo;
                 if (propInfo != null
@@ -336,11 +336,11 @@ namespace Lambda2Js
                     && node.Member.Name == "Count"
                     && TypeHelpers.IsListType(propInfo.DeclaringType))
                 {
-                    this.result.Append("length");
+                    this.result.Write("length");
                 }
                 else
                 {
-                    this.result.Append(node.Member.Name);
+                    this.result.Write(node.Member.Name);
                 }
 
                 return node;
@@ -395,7 +395,7 @@ namespace Lambda2Js
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            this.result.Append(node.Name);
+            this.result.Write(node.Name);
             return node;
         }
 
@@ -403,18 +403,18 @@ namespace Lambda2Js
         {
             using (this.result.Operation(0))
             {
-                this.result.Append('[');
+                this.result.Write('[');
 
                 var posStart = this.result.Length;
                 foreach (var item in node.Expressions)
                 {
                     if (this.result.Length > posStart)
-                        this.result.Append(',');
+                        this.result.Write(',');
 
                     this.Visit(item);
                 }
 
-                this.result.Append(']');
+                this.result.Write(']');
             }
 
             return node;
@@ -428,25 +428,25 @@ namespace Lambda2Js
             {
                 using (this.result.Operation(0))
                 {
-                    this.result.Append('{');
+                    this.result.Write('{');
 
                     var posStart = this.result.Length;
                     for (int itMember = 0; itMember < node.Members.Count; itMember++)
                     {
                         var member = node.Members[itMember];
                         if (this.result.Length > posStart)
-                            this.result.Append(',');
+                            this.result.Write(',');
 
                         if (Regex.IsMatch(member.Name, @"^\w[\d\w]*$"))
-                            this.result.Append(member.Name);
+                            this.result.Write(member.Name);
                         else
                             this.WriteStringLiteral(member.Name);
 
-                        this.result.Append(':');
+                        this.result.Write(':');
                         this.Visit(node.Arguments[itMember]);
                     }
 
-                    this.result.Append('}');
+                    this.result.Write('}');
                 }
 
                 return node;
@@ -459,23 +459,23 @@ namespace Lambda2Js
                 // if all parameters are constant
                 if (node.Arguments.All(a => a.NodeType == ExpressionType.Constant))
                 {
-                    this.result.Append('/');
+                    this.result.Write('/');
 
                     var pattern = (string)((ConstantExpression)node.Arguments[0]).Value;
-                    this.result.Append(pattern);
+                    this.result.Write(pattern);
                     var args = node.Arguments.Count;
 
-                    this.result.Append('/');
-                    this.result.Append('g');
+                    this.result.Write('/');
+                    this.result.Write('g');
                     RegexOptions options = 0;
                     if (args == 2)
                     {
                         options = (RegexOptions)((ConstantExpression)node.Arguments[1]).Value;
 
                         if ((options & RegexOptions.IgnoreCase) != 0)
-                            this.result.Append('i');
+                            this.result.Write('i');
                         if ((options & RegexOptions.Multiline) != 0)
-                            this.result.Append('m');
+                            this.result.Write('m');
                     }
 
                     var ecmaRegex = new Regex(pattern, options | RegexOptions.ECMAScript);
@@ -484,7 +484,7 @@ namespace Lambda2Js
                 {
                     using (this.result.Operation(JavascriptOperationTypes.New))
                     {
-                        this.result.Append("new RegExp(");
+                        this.result.Write("new RegExp(");
 
                         using (this.result.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
                             this.Visit(node.Arguments[0]);
@@ -493,7 +493,7 @@ namespace Lambda2Js
 
                         if (args == 2)
                         {
-                            this.result.Append(',');
+                            this.result.Write(',');
 
                             var optsConst = node.Arguments[1] as ConstantExpression;
                             if (optsConst == null)
@@ -501,16 +501,16 @@ namespace Lambda2Js
 
                             var options = (RegexOptions)optsConst.Value;
 
-                            this.result.Append('\'');
-                            this.result.Append('g');
+                            this.result.Write('\'');
+                            this.result.Write('g');
                             if ((options & RegexOptions.IgnoreCase) != 0)
-                                this.result.Append('i');
+                                this.result.Write('i');
                             if ((options & RegexOptions.Multiline) != 0)
-                                this.result.Append('m');
-                            this.result.Append('\'');
+                                this.result.Write('m');
+                            this.result.Write('\'');
                         }
 
-                        this.result.Append(')');
+                        this.result.Write(')');
                     }
                 }
             }
@@ -527,7 +527,7 @@ namespace Lambda2Js
                     using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                     {
                         this.Visit(node.Object);
-                        this.result.Append('[');
+                        this.result.Write('[');
 
                         using (this.result.Operation(0))
                         {
@@ -535,13 +535,13 @@ namespace Lambda2Js
                             foreach (var arg in node.Arguments)
                             {
                                 if (this.result.Length != posStart0)
-                                    this.result.Append(',');
+                                    this.result.Write(',');
 
                                 this.Visit(arg);
                             }
                         }
 
-                        this.result.Append(']');
+                        this.result.Write(']');
                         return node;
                     }
                 }
@@ -555,7 +555,7 @@ namespace Lambda2Js
                             using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                             {
                                 this.Visit(node.Object);
-                                this.result.Append('[');
+                                this.result.Write('[');
 
                                 using (this.result.Operation(0))
                                 {
@@ -563,17 +563,17 @@ namespace Lambda2Js
                                     foreach (var arg in node.Arguments)
                                     {
                                         if (this.result.Length != posStart0)
-                                            this.result.Append(',');
+                                            this.result.Write(',');
 
                                         this.Visit(arg);
                                     }
                                 }
 
-                                this.result.Append(']');
+                                this.result.Write(']');
                             }
                         }
 
-                        this.result.Append('=');
+                        this.result.Write('=');
                         this.Visit(node.Arguments.Single());
                     }
 
@@ -590,10 +590,10 @@ namespace Lambda2Js
                     {
                         using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                             this.Visit(node.Object);
-                        this.result.Append(".hasOwnProperty(");
+                        this.result.Write(".hasOwnProperty(");
                         using (this.result.Operation(0))
                             this.Visit(node.Arguments.Single());
-                        this.result.Append(')');
+                        this.result.Write(')');
                         return node;
                     }
                 }
@@ -609,22 +609,22 @@ namespace Lambda2Js
                         {
                             using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                                 this.Visit(node.Object);
-                            this.result.Append(".indexOf(");
+                            this.result.Write(".indexOf(");
                             using (this.result.Operation(0))
                             {
                                 var posStart = this.result.Length;
                                 foreach (var arg in node.Arguments)
                                 {
                                     if (this.result.Length > posStart)
-                                        this.result.Append(',');
+                                        this.result.Write(',');
                                     this.Visit(arg);
                                 }
                             }
 
-                            this.result.Append(')');
+                            this.result.Write(')');
                         }
 
-                        this.result.Append(">=0");
+                        this.result.Write(">=0");
                         return node;
                     }
                 }
@@ -663,7 +663,7 @@ namespace Lambda2Js
                     {
                         using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                             this.Visit(node.Object);
-                        this.result.AppendFormat(".{0}", methodName);
+                        this.result.WriteFormat(".{0}", methodName);
                         return node;
                     }
             }
@@ -674,22 +674,22 @@ namespace Lambda2Js
             using (this.result.Operation(JavascriptOperationTypes.Call))
                 if (node.Method.DeclaringType != null)
                 {
-                    this.result.Append(node.Method.DeclaringType.FullName);
-                    this.result.Append('.');
-                    this.result.Append(node.Method.Name);
-                    this.result.Append('(');
+                    this.result.Write(node.Method.DeclaringType.FullName);
+                    this.result.Write('.');
+                    this.result.Write(node.Method.Name);
+                    this.result.Write('(');
 
                     var posStart = this.result.Length;
                     using (this.result.Operation(0))
                         foreach (var arg in node.Arguments)
                         {
                             if (this.result.Length != posStart)
-                                this.result.Append(',');
+                                this.result.Write(',');
 
                             this.Visit(arg);
                         }
 
-                    this.result.Append(')');
+                    this.result.Write(')');
 
                     return node;
                 }

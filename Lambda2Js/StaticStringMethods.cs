@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace Lambda2Js
@@ -19,15 +18,8 @@ namespace Lambda2Js
                                 var writer = context.GetWriter();
                                 using (writer.Operation(JavascriptOperationTypes.Concat))
                                 {
-                                    writer.Append("''+");
-                                    var posStart = writer.Length;
-                                    foreach (var arg in methodCall.Arguments)
-                                    {
-                                        if (writer.Length > posStart)
-                                            writer.Append('+');
-
-                                        context.Visitor.Visit(arg);
-                                    }
+                                    writer.Write("''+");
+                                    context.WriteMany('+', methodCall.Arguments);
                                 }
 
                                 return;
@@ -49,16 +41,16 @@ namespace Lambda2Js
 
                                         // if second parameter is an enumerable, render it directly
                                         context.Visitor.Visit(methodCall.Arguments[1]);
-                                        writer.Append(".join");
+                                        writer.Write(".join");
                                     }
 
-                                    writer.Append('(');
+                                    writer.Write('(');
 
                                     // separator
                                     using (writer.Operation(0))
                                         context.Visitor.Visit(methodCall.Arguments[0]);
 
-                                    writer.Append(')');
+                                    writer.Write(')');
                                 }
 
                                 return;
