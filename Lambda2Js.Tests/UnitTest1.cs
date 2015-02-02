@@ -12,6 +12,38 @@ namespace Lambda2Js.Tests
     public class UnitTest1
     {
         [TestMethod]
+        public void FuncWithScopeArgsWithBody()
+        {
+            Expression<Func<MyClass, object>> expr = x => new { x.Age, x.Name, x.Phones };
+            var js = expr.CompileToJavascript(new JavascriptCompilationOptions(JsCompilationFlags.ScopeParameter));
+            Assert.AreEqual("function(Age,Name,Phones){return {Age:Age,Name:Name,Phones:Phones};}", js);
+        }
+
+        [TestMethod]
+        public void FuncWithScopeArgsWoBody()
+        {
+            Expression<Func<MyClass, object>> expr = x => new { x.Age, x.Name, x.Phones };
+            var js = expr.CompileToJavascript(new JavascriptCompilationOptions(JsCompilationFlags.ScopeParameter | JsCompilationFlags.BodyOnly));
+            Assert.AreEqual("{Age:Age,Name:Name,Phones:Phones}", js);
+        }
+
+        [TestMethod]
+        public void FuncWoScopeArgsWithBody()
+        {
+            Expression<Func<MyClass, object>> expr = x => new { x.Age, x.Name, x.Phones };
+            var js = expr.CompileToJavascript(new JavascriptCompilationOptions(0));
+            Assert.AreEqual("function(x){return {Age:x.Age,Name:x.Name,Phones:x.Phones};}", js);
+        }
+
+        [TestMethod]
+        public void FuncWoScopeArgsWoBody()
+        {
+            Expression<Func<MyClass, object>> expr = x => new { x.Age, x.Name, x.Phones };
+            var js = expr.CompileToJavascript(new JavascriptCompilationOptions(JsCompilationFlags.BodyOnly));
+            Assert.AreEqual("{Age:x.Age,Name:x.Name,Phones:x.Phones}", js);
+        }
+
+        [TestMethod]
         public void LinqWhere()
         {
             Expression<Func<MyClass, object>> expr = x => x.Phones.Where(p => p.DDD == 21);

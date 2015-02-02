@@ -3,6 +3,9 @@ using System.Linq.Expressions;
 
 namespace Lambda2Js
 {
+    /// <summary>
+    /// Extension that allows the conversion of static `String` class methods.
+    /// </summary>
     public class StaticStringMethods : JavascriptConversionExtension
     {
         public override void ConvertToJavascript(JavascriptConversionContext context)

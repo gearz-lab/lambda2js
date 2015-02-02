@@ -10,11 +10,15 @@ using JetBrains.Annotations;
 
 namespace Lambda2Js
 {
+    /// <summary>
+    /// Expression visitor that converts each node to JavaScript code.
+    /// </summary>
     public class JavascriptCompilerExpressionVisitor : ExpressionVisitor
     {
         private readonly ParameterExpression contextParameter;
         private readonly IEnumerable<JavascriptConversionExtension> extensions;
         private readonly JavascriptWriter result = new JavascriptWriter();
+        private List<string> usedScopeMembers;
 
         public JavascriptCompilerExpressionVisitor(
             ParameterExpression contextParameter,
@@ -24,9 +28,21 @@ namespace Lambda2Js
             this.extensions = extensions;
         }
 
+        /// <summary>
+        /// Gets the resulting JavaScript code.
+        /// </summary>
         public string Result
         {
             get { return this.result.ToString(); }
+        }
+
+        /// <summary>
+        /// Gets the scope names that were used from the scope parameter.
+        /// </summary>
+        [CanBeNull]
+        public string[] UsedScopeMembers
+        {
+            get { return this.usedScopeMembers == null ? null : this.usedScopeMembers.ToArray(); }
         }
 
         public override Expression Visit(Expression node)
@@ -332,6 +348,11 @@ namespace Lambda2Js
                 }
                 else if (node.Expression != this.contextParameter)
                     this.Visit(node.Expression);
+                else
+                {
+                    this.usedScopeMembers = this.usedScopeMembers ?? new List<string>();
+                    this.usedScopeMembers.Add(node.Member.Name);
+                }
 
                 if (this.result.Length > pos)
                     this.result.Write('.');
@@ -461,7 +482,8 @@ namespace Lambda2Js
 
             if (node.Type == typeof(Regex))
             {
-                var lambda = Expression.Lambda<Func<Regex>>(node);
+                // To run the regex use this code:
+                // var lambda = Expression.Lambda<Func<Regex>>(node);
 
                 // if all parameters are constant
                 if (node.Arguments.All(a => a.NodeType == ExpressionType.Constant))
@@ -485,6 +507,8 @@ namespace Lambda2Js
                             this.result.Write('m');
                     }
 
+                    // creating a Regex object with `ECMAScript` to make sure the pattern is valid in JavaScript.
+                    // If it is not valid, then an exception is thrown.
                     var ecmaRegex = new Regex(pattern, options | RegexOptions.ECMAScript);
                 }
                 else
@@ -676,7 +700,7 @@ namespace Lambda2Js
             }
 
             if (!node.Method.IsStatic)
-                throw new NotSupportedException("Can only convert static methods.");
+                throw new NotSupportedException(string.Format("By default, Lambda2Js cannot convert custom instance methods, only static ones. `{0}` is not static.", node.Method.Name));
 
             using (this.result.Operation(JavascriptOperationTypes.Call))
                 if (node.Method.DeclaringType != null)
