@@ -15,6 +15,13 @@ namespace Lambda2Js
             this.Extensions = Enumerable.Empty<JavascriptConversionExtension>();
         }
 
+        public JavascriptCompilationOptions(
+            JsCompilationFlags flags,
+            params JavascriptConversionExtension[] extensions)
+            : this(flags, (IEnumerable<JavascriptConversionExtension>)extensions)
+        {
+        }
+
         public JavascriptCompilationOptions(JsCompilationFlags flags, IEnumerable<JavascriptConversionExtension> extensions = null)
         {
             this.BodyOnly = (flags & JsCompilationFlags.BodyOnly) != 0;
