@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Lambda2Js.Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class GeneralTests
     {
         [TestMethod]
         public void FuncWithScopeArgsWithBody()

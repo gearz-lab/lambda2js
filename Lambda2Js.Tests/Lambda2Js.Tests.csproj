@@ -53,7 +53,7 @@
     <Compile Include="CustomClassMethodTests.cs" />
     <Compile Include="StaticMathMethodTests.cs" />
     <Compile Include="StaticStringMethodTests.cs" />
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="GeneralTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

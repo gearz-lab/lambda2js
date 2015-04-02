@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Lambda2Js.Tests
 {
     [TestClass]
-    public class StaticStringMethodTests
+    public class StaticStringMethodsTests
     {
         [TestMethod]
         public void StringConcat0()
