@@ -2,7 +2,7 @@
 
 This is an ExpressionTree (lambda) to Javascript converter.
 
-It is portable, so that you can use it is most environments.
+It is portable, so that you can use it in most environments.
 
 It's purpose is to convert a C# expression tree (from Linq namespace) to a syntatically correct javascript code.
 
@@ -21,12 +21,22 @@ Installing [NuGet package](https://www.nuget.org/packages/Lambda2Js):
 Samples
 -------
 
+Converting lambda with boolean and numeric operations:
+
     Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 || x.Phones.Length != 1;
     var js = expr.CompileToJavascript();
-    Assert.AreEqual("PhonesByName[\"Miguel\"].DDD==32||Phones.length!=1", js);
+    // js = PhonesByName["Miguel"].DDD==32||Phones.length!=1
 
+Converting lambda with LINQ expression, containing a inner lambda:
 
-    
     Expression<Func<MyClass, object>> expr = x => x.Phones.FirstOrDefault(p => p.DDD > 10);
     var js = expr.CompileToJavascript();
-    Assert.AreEqual("System.Linq.Enumerable.FirstOrDefault(Phones,function(p){return p.DDD>10;})", js);
+    // js = System.Linq.Enumerable.FirstOrDefault(Phones,function(p){return p.DDD>10;})
+
+Converting lambda with Linq `Select` method:
+
+    var js = expr.CompileToJavascript(
+        new JavascriptCompilationOptions(
+            JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
+            new[] { new LinqMethods(), }));
+    // js = array.map(function(x){return x[0];})

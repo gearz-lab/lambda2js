@@ -50,6 +50,7 @@
     <Compile Include="PrecedenceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaticMathMethods.cs" />
+    <Compile Include="LinqMethods.cs" />
     <Compile Include="StaticStringMethods.cs" />
   </ItemGroup>
   <ItemGroup>
