@@ -6,6 +6,6 @@ namespace Lambda2Js
     public enum JsCompilationFlags
     {
         BodyOnly = 1,
-        ScopeParameter = 2
+        ScopeParameter = 2,
     }
 }

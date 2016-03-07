@@ -553,7 +553,8 @@ namespace Lambda2Js
         {
             if (node.Method.IsSpecialName)
             {
-                if (node.Method.Name == "get_Item")
+                var isIndexer = node.Method.Name == "get_Item" || node.Method.Name == "get_Chars";
+                if (isIndexer)
                 {
                     using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
                     {

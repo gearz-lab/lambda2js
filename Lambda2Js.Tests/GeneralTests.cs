@@ -296,6 +296,22 @@ namespace Lambda2Js.Tests
         }
 
         [TestMethod]
+        public void StringIndexer1()
+        {
+            Expression<Func<string, char>> expr = s => s[0];
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("s[0]", js);
+        }
+
+        [TestMethod]
+        public void StringIndexer2()
+        {
+            Expression<Func<string, char>> expr = s => "MASB"[0];
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("(\"MASB\")[0]", js);
+        }
+
+        [TestMethod]
         public void NumLiteralToString1()
         {
             Expression<Func<string>> expr = () => 1.ToString();
