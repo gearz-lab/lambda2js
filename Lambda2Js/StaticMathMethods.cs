@@ -12,6 +12,57 @@ namespace Lambda2Js
             public byte length;
         }
 
+        // Equivalence table between javascript and .Net
+        //
+        // .Net methods         JavaScript functions
+        // -------------------  --------------------
+        // Math.Abs             Math.abs
+        // Math.Acos            Math.acos
+        //                      Math.acosh
+        // Math.Asin            Math.asin
+        //                      Math.asinh
+        // Math.Atan            Math.atan
+        //                      Math.atanh
+        // Math.Atan2           Math.atan2
+        //                      Math.cbrt
+        // Math.Ceiling         Math.ceil
+        //                      Math.clz32
+        // Math.Cos             Math.cos
+        // Math.Cosh            Math.cosh
+        // Math.Exp             Math.exp
+        // Math.Floor           Math.floor
+        //                      Math.expm1
+        //                      Math.fround
+        //                      Math.ipot
+        //                      Math.imul
+        // Math.IEEERemainder
+        // Math.Log             Math.log
+        // Math.Log10           Math.log10
+        //                      Math.log1p
+        //                      Math.log2
+        // Math.Max             Math.max
+        // Math.Min             Math.min
+        // Math.Pow             Math.pow
+        //                      Math.random
+        // Math.Round           Math.round
+        // Math.Sign            Math.sign
+        // Math.Sin             Math.sin
+        // Math.Sinh            Math.sinh
+        // Math.Sqrt            Math.sqrt
+        // Math.Tan             Math.tan
+        // Math.Tanh            Math.tanh
+        //                      Math.trunc
+        //
+        // .Net constants       JavaScript constants
+        // -------------------  ---------------------
+        // Math.E               Math.E
+        //                      Math.LN10
+        //                      Math.LN2
+        //                      Math.LOG10E
+        //                      Math.LOG2E
+        // Math.PI              Math.PI
+        //                      Math.SQRT1_2
+        //                      Math.SQRT2
         private static readonly Dictionary<string, NameLength> membersMap = new Dictionary<string, NameLength>
             {
                 { "Abs", new NameLength { name = "abs",     length = 1 } },
@@ -47,51 +98,6 @@ namespace Lambda2Js
 
         public override void ConvertToJavascript(JavascriptConversionContext context)
         {
-            // Math.Abs             Math.abs
-            // Math.Acos            Math.acos
-            //                      Math.acosh
-            // Math.Asin            Math.asin
-            //                      Math.asinh
-            // Math.Atan            Math.atan
-            //                      Math.atanh
-            // Math.Atan2           Math.atan2
-            //                      Math.cbrt
-            // Math.Ceiling         Math.ceil
-            //                      Math.clz32
-            // Math.Cos             Math.cos
-            // Math.Cosh            Math.cosh
-            // Math.Exp             Math.exp
-            // Math.Floor           Math.floor
-            //                      Math.expm1
-            //                      Math.fround
-            //                      Math.ipot
-            //                      Math.imul
-            // Math.IEEERemainder
-            // Math.Log             Math.log
-            // Math.Log10           Math.log10
-            //                      Math.log1p
-            //                      Math.log2
-            // Math.Max             Math.max
-            // Math.Min             Math.min
-            // Math.Pow             Math.pow
-            //                      Math.random
-            // Math.Round           Math.round
-            // Math.Sign            Math.sign
-            // Math.Sin             Math.sin
-            // Math.Sinh            Math.sinh
-            // Math.Sqrt            Math.sqrt
-            // Math.Tan             Math.tan
-            // Math.Tanh            Math.tanh
-            //                      Math.trunc
-
-            // Math.E               Math.E
-            //                      Math.LN10
-            //                      Math.LN2
-            //                      Math.LOG10E
-            //                      Math.LOG2E
-            // Math.PI              Math.PI
-            //                      Math.SQRT1_2
-            //                      Math.SQRT2
             var methodCall = context.Node as MethodCallExpression;
             if (methodCall != null)
                 if (methodCall.Method.DeclaringType == typeof(Math))
