@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <title>lambda2js (ExpressionTree to JavaScript)</title>
     <authors>Gearz</authors>
     <owners>Gearz</owners>
@@ -18,11 +18,13 @@
     <releaseNotes>
         Portable `lambda2js` Lambda expression to JavaScript converter.
         Added `Math` static members.
+        Added `System.Linq` static members.
+        ES6: arrow function, array spread.
         See the project page for more.
     </releaseNotes>
-    <copyright>Copyright Gearz 2015</copyright>
+    <copyright>Copyright Gearz 2016</copyright>
     <tags>
-        Expression Tree ExpressionTree JavaScript converter gearz miguel angelo andre pena
+        Expression Tree ExpressionTree JavaScript ECMA script converter gearz miguel angelo andre pena
     </tags>
   </metadata>
 </package>
