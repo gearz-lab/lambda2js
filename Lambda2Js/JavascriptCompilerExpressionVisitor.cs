@@ -222,7 +222,7 @@ namespace Lambda2Js
         {
             // Ecma script 6+: rendering arrow function syntax
             // Other: rendering inline annonimous function
-            if (this.Options.ScriptVersion >= ScriptVersion.Es60)
+            if (this.Options.ScriptVersion.Supports(JavascriptSyntax.ArrowFunction))
             {
                 // Arrow function syntax and precedence works mostly like an assignment.
                 using (this.result.Operation(JavascriptOperationTypes.AssignRhs))
