@@ -2,9 +2,9 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <title>lambda2js (ExpressionTree to JavaScript)</title>
-    <authors>Gearz</authors>
+    <authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</authors>
     <owners>Gearz</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
     <projectUrl>https://github.com/gearz-lab/lambda2js</projectUrl>
@@ -20,6 +20,7 @@
         Added `Math` static members.
         Added `System.Linq` static members.
         ES6: arrow function, array spread.
+        Added support for new operator with member init.
         See the project page for more.
     </releaseNotes>
     <copyright>Copyright Gearz 2016</copyright>
