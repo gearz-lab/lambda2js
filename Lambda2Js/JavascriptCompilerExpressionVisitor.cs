@@ -811,7 +811,7 @@ namespace Lambda2Js
 
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
-            return node;
+            throw new NotSupportedException("MemberInitExpression is not supported. Converting it requires a custom JavascriptConversionExtension like MemberInitAsJson.");
         }
 
         protected override MemberBinding VisitMemberBinding(MemberBinding node)

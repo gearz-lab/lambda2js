@@ -107,5 +107,23 @@ namespace Lambda2Js.Tests
 
             Assert.AreEqual("new Lambda2Js.Tests.CustomClassMethodTests.MyCustomClass(\"Miguel\")", js);
         }
+
+        [TestMethod]
+        public void NewCustomClassAsNewOfTypeWithMemberInit()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass { Name = "Miguel" };
+
+            Exception exception = null;
+            try
+            {
+                expr.Body.CompileToJavascript();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            Assert.IsInstanceOfType(exception, typeof(NotSupportedException), "Exception not thrown.");
+        }
     }
 }
