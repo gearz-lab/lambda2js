@@ -54,7 +54,7 @@ namespace Lambda2Js.Tests
 
             var js = expr.CompileToJavascript(
                 new JavascriptCompilationOptions(
-                    JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
+                    JsCompilationFlags.BodyOnly,
                     new MyCustomClassMethods(),
                     new StaticStringMethods()));
 
@@ -68,7 +68,7 @@ namespace Lambda2Js.Tests
 
             var js = expr.CompileToJavascript(
                 new JavascriptCompilationOptions(
-                    JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
+                    JsCompilationFlags.BodyOnly,
                     new MyCustomClassMethods(),
                     new StaticStringMethods()));
 
