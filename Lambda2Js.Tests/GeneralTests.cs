@@ -239,6 +239,30 @@ namespace Lambda2Js.Tests
         }
 
         [TestMethod]
+        public void ArrowFunctionOneArg()
+        {
+            Expression<Func<int, int>> expr = x => 1024 + x;
+            var js = expr.CompileToJavascript(new JavascriptCompilationOptions(0, ScriptVersion.Es60));
+            Assert.AreEqual(@"x=>1024+x", js);
+        }
+
+        [TestMethod]
+        public void ArrowFunctionManyArgs()
+        {
+            Expression<Func<int, int, int>> expr = (x, y) => y + x;
+            var js = expr.CompileToJavascript(new JavascriptCompilationOptions(0, ScriptVersion.Es60));
+            Assert.AreEqual(@"(x,y)=>y+x", js);
+        }
+
+        [TestMethod]
+        public void ArrowFunctionNoArgs()
+        {
+            Expression<Func<int>> expr = () => 1024;
+            var js = expr.CompileToJavascript(new JavascriptCompilationOptions(0, ScriptVersion.Es60));
+            Assert.AreEqual(@"()=>1024", js);
+        }
+
+        [TestMethod]
         public void Regex1()
         {
             Expression<Func<Regex>> expr = () => new Regex(@"^\d{4}-\d\d-\d\d$", RegexOptions.IgnoreCase);

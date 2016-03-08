@@ -32,6 +32,7 @@ namespace Lambda2Js
         /// <para>op |= value</para>
         /// <para>op &amp;= value</para>
         /// <para>op ^= value</para>
+        /// <para>() => value</para>
         /// </summary>
         ParamIsolatedLhs,
 

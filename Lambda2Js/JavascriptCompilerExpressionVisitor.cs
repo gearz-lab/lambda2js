@@ -220,33 +220,75 @@ namespace Lambda2Js
 
         protected override Expression VisitLambda<T>(Expression<T> node)
         {
-            using (this.result.Operation(node))
+            // Ecma script 6+: rendering arrow function syntax
+            // Other: rendering inline annonimous function
+            if (this.Options.ScriptVersion >= ScriptVersion.Es60)
             {
-                this.result.Write("function(");
-
-                var posStart = this.result.Length;
-                foreach (var param in node.Parameters)
+                // Arrow function syntax and precedence works mostly like an assignment.
+                using (this.result.Operation(JavascriptOperationTypes.AssignRhs))
                 {
-                    if (param.IsByRef)
-                        throw new NotSupportedException("Cannot pass by ref in javascript.");
+                    var pars = node.Parameters;
+                    if (pars.Count != 1)
+                        this.result.Write("(");
 
-                    if (this.result.Length > posStart)
-                        this.result.Write(',');
-
-                    this.result.Write(param.Name);
-                }
-
-                this.result.Write("){");
-                if (node.ReturnType != typeof(void))
-                    using (this.result.Operation(0))
+                    var posStart = this.result.Length;
+                    foreach (var param in node.Parameters)
                     {
-                        this.result.Write("return ");
-                        this.Visit(node.Body);
+                        if (param.IsByRef)
+                            throw new NotSupportedException("Cannot pass by ref in javascript.");
+
+                        if (this.result.Length > posStart)
+                            this.result.Write(',');
+
+                        this.result.Write(param.Name);
                     }
 
-                this.result.Write(";}");
-                return node;
+                    if (pars.Count != 1)
+                        this.result.Write(")");
+
+                    this.result.Write("=>");
+
+                    using (this.result.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
+                    {
+                        this.Visit(node.Body);
+                    }
+                }
             }
+            else
+            {
+                using (this.result.Operation(node))
+                {
+                    this.result.Write("function(");
+
+                    var posStart = this.result.Length;
+                    foreach (var param in node.Parameters)
+                    {
+                        if (param.IsByRef)
+                            throw new NotSupportedException("Cannot pass by ref in javascript.");
+
+                        if (this.result.Length > posStart)
+                            this.result.Write(',');
+
+                        this.result.Write(param.Name);
+                    }
+
+                    this.result.Write("){");
+                    if (node.ReturnType != typeof(void))
+                        using (this.result.Operation(0))
+                        {
+                            this.result.Write("return ");
+                            this.Visit(node.Body);
+                        }
+                    else
+                        using (this.result.Operation(0))
+                        {
+                            this.Visit(node.Body);
+                        }
+
+                    this.result.Write(";}");
+                }
+            }
+            return node;
         }
 
         protected override Expression VisitListInit(ListInitExpression node)
