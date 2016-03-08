@@ -184,8 +184,9 @@ namespace Lambda2Js
                 case ExpressionType.TypeEqual:
                 case ExpressionType.TypeIs:
                 case ExpressionType.Unbox:
-                default:
                     return JavascriptOperationTypes.NoOp;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(nodeType));
             }
         }
 

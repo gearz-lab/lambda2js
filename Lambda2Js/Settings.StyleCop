@@ -1,8 +1,8 @@
 <StyleCopSettings Version="105">
   <GlobalSettings>
-    <StringProperty Name="Culture">en-US</StringProperty>
     <CollectionProperty Name="RecognizedWords">
       <Value>Javascript</Value>
+      <Value>Lambda2Js</Value>
     </CollectionProperty>
   </GlobalSettings>
   <Analyzers>
