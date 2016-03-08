@@ -47,5 +47,18 @@ namespace Lambda2Js.Tests
 
             Assert.AreEqual("array.slice()", js);
         }
+
+        [TestMethod]
+        public void LinqToArrayEs6()
+        {
+            Expression<Func<string[], IEnumerable<string>>> expr = array => array.ToArray();
+
+            var js = expr.Body.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    ScriptVersion.Es60,
+                    new LinqMethods()));
+
+            Assert.AreEqual("[...array]", js);
+        }
     }
 }

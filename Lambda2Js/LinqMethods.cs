@@ -77,23 +77,34 @@ namespace Lambda2Js
 
                         case "ToArray":
                             {
-                                var writer = context.GetWriter();
-                                using (writer.Operation(JavascriptOperationTypes.Call))
+                                // Ecma Script 6+: use spread operator
+                                // Other: use array `slice`
+                                if (context.Options.ScriptVersion.Supports(JavascriptSyntax.ArraySpread))
                                 {
-                                    using (writer.Operation(JavascriptOperationTypes.IndexerProperty))
+                                    var writer = context.GetWriter();
+                                    using (writer.Operation(0))
                                     {
-                                        // public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-                                        // public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
-                                        var pars = methodCall.Method.GetParameters();
-                                        if (pars.Length != 2)
-                                            throw new NotSupportedException("The `Enumerable.Where` method must have 2 parameters.");
-
-                                        context.Visitor.Visit(methodCall.Arguments[0]);
-                                        writer.Write(".slice");
+                                        writer.Write('[');
+                                        writer.Write("...");
+                                        using (writer.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
+                                            context.Visitor.Visit(methodCall.Arguments[0]);
+                                        writer.Write(']');
                                     }
+                                }
+                                else
+                                {
+                                    var writer = context.GetWriter();
+                                    using (writer.Operation(JavascriptOperationTypes.Call))
+                                    {
+                                        using (writer.Operation(JavascriptOperationTypes.IndexerProperty))
+                                        {
+                                            context.Visitor.Visit(methodCall.Arguments[0]);
+                                            writer.Write(".slice");
+                                        }
 
-                                    writer.Write('(');
-                                    writer.Write(')');
+                                        writer.Write('(');
+                                        writer.Write(')');
+                                    }
                                 }
 
                                 return;
