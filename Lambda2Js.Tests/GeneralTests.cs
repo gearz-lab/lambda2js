@@ -266,7 +266,7 @@ namespace Lambda2Js.Tests
         public void Regex1()
         {
             Expression<Func<Regex>> expr = () => new Regex(@"^\d{4}-\d\d-\d\d$", RegexOptions.IgnoreCase);
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual(@"/^\d{4}-\d\d-\d\d$/gi", js);
         }
 
@@ -274,7 +274,7 @@ namespace Lambda2Js.Tests
         public void Regex1b()
         {
             Expression<Func<Regex>> expr = () => new Regex(@"^\d{4}-\d\d-\d\d$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual(@"/^\d{4}-\d\d-\d\d$/gim", js);
         }
 
@@ -282,7 +282,7 @@ namespace Lambda2Js.Tests
         public void Regex2()
         {
             Expression<Func<Func<string, Regex>>> expr = () => (p => new Regex(p, RegexOptions.IgnoreCase | RegexOptions.Multiline));
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual(@"function(p){return new RegExp(p,'gim');}", js);
         }
 
@@ -291,7 +291,7 @@ namespace Lambda2Js.Tests
         public void Regex3()
         {
             Expression<Func<Func<string, RegexOptions, Regex>>> expr = () => ((p, o) => new Regex(p, o | RegexOptions.Multiline));
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             //Assert.AreEqual(@"function(p,o){return new RegExp(p,'g'+o+'m');}", js);
         }
 
@@ -299,7 +299,7 @@ namespace Lambda2Js.Tests
         public void StringCompare1()
         {
             Expression<Func<Func<string, string, int>>> expr = () => ((s, b) => string.Compare(s, b));
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual(@"function(s,b){return System.String.Compare(s,b);}", js);
         }
 
@@ -339,7 +339,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToString1()
         {
             Expression<Func<string>> expr = () => 1.ToString();
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toString()", js);
         }
 
@@ -347,7 +347,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringD()
         {
             Expression<Func<string>> expr = () => 1.ToString("D");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toString()", js);
         }
 
@@ -355,7 +355,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringE()
         {
             Expression<Func<string>> expr = () => 1.ToString("E");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toExponential()", js);
         }
 
@@ -363,7 +363,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringE4()
         {
             Expression<Func<string>> expr = () => 1.ToString("E4");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toExponential(4)", js);
         }
 
@@ -371,7 +371,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringF()
         {
             Expression<Func<string>> expr = () => 1.ToString("F");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toFixed()", js);
         }
 
@@ -379,7 +379,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringF4()
         {
             Expression<Func<string>> expr = () => 1.ToString("F4");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toFixed(4)", js);
         }
 
@@ -387,7 +387,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringG()
         {
             Expression<Func<string>> expr = () => 1.ToString("G");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toFixed()", js);
         }
 
@@ -395,7 +395,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringG4()
         {
             Expression<Func<string>> expr = () => 1.ToString("G4");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toFixed(4)", js);
         }
 
@@ -403,7 +403,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringN()
         {
             Expression<Func<string>> expr = () => 1.ToString("N");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toLocaleString()", js);
         }
 
@@ -411,7 +411,7 @@ namespace Lambda2Js.Tests
         public void NumLiteralToStringX()
         {
             Expression<Func<string>> expr = () => 1.ToString("X");
-            var js = expr.CompileToJavascript();
+            var js = expr.Body.CompileToJavascript();
             Assert.AreEqual("(1).toString(16)", js);
         }
 
