@@ -10,7 +10,7 @@ namespace Lambda2Js
         private readonly JavascriptWriter result;
 
         [NotNull]
-        private Expression node;
+        private readonly Expression node;
 
         internal bool preventDefault;
 
@@ -22,11 +22,11 @@ namespace Lambda2Js
             [NotNull] JavascriptWriter result)
         {
             if (node == null)
-                throw new ArgumentNullException("node");
+                throw new ArgumentNullException(nameof(node));
             if (visitor == null)
-                throw new ArgumentNullException("visitor");
+                throw new ArgumentNullException(nameof(visitor));
             if (result == null)
-                throw new ArgumentNullException("result");
+                throw new ArgumentNullException(nameof(result));
             this.result = result;
             this.Visitor = visitor;
             this.node = node;

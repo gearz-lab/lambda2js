@@ -31,19 +31,13 @@ namespace Lambda2Js
         /// <summary>
         /// Gets the resulting JavaScript code.
         /// </summary>
-        public string Result
-        {
-            get { return this.result.ToString(); }
-        }
+        public string Result => this.result.ToString();
 
         /// <summary>
         /// Gets the scope names that were used from the scope parameter.
         /// </summary>
         [CanBeNull]
-        public string[] UsedScopeMembers
-        {
-            get { return this.usedScopeMembers == null ? null : this.usedScopeMembers.ToArray(); }
-        }
+        public string[] UsedScopeMembers => this.usedScopeMembers?.ToArray();
 
         public override Expression Visit(Expression node)
         {

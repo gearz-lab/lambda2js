@@ -8,7 +8,7 @@ namespace Lambda2Js
     public static class LambdaExpressionExtensions
     {
         /// <summary>
-        /// Compiles an expression to JavaScript code.
+        /// Compiles a lambda expression to JavaScript code.
         /// </summary>
         /// <param name="expr">Expression to compile to JavaScript.</param>
         /// <param name="options">
@@ -21,7 +21,7 @@ namespace Lambda2Js
         public static string CompileToJavascript([NotNull] this LambdaExpression expr, JavascriptCompilationOptions options = null)
         {
             if (expr == null)
-                throw new ArgumentNullException("expr");
+                throw new ArgumentNullException(nameof(expr));
 
             options = options ?? JavascriptCompilationOptions.DefaultOptions;
 
@@ -31,14 +31,11 @@ namespace Lambda2Js
                     options.ScopeParameter ? expr.Parameters.Single() : null,
 
             visitor.Visit(options.BodyOnly || options.ScopeParameter ? expr.Body : expr);
-            if (!options.BodyOnly && options.ScopeParameter)
-                if (visitor.UsedScopeMembers != null)
-                    return string.Format(
-                        "function({0}){{return {1};}}",
-                        string.Join(",", visitor.UsedScopeMembers),
-                        visitor.Result);
 
-            return visitor.Result;
+            if (options.BodyOnly || !options.ScopeParameter || visitor.UsedScopeMembers == null)
+                return visitor.Result;
+
+            return $"function({string.Join(",", visitor.UsedScopeMembers)}){{return {visitor.Result};}}";
         }
     }
 }
