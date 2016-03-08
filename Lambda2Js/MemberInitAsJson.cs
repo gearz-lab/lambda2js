@@ -61,7 +61,7 @@ namespace Lambda2Js
                     if (Regex.IsMatch(assignExpr.Member.Name, @"^\w[\d\w]*$"))
                         writer.Write(assignExpr.Member.Name);
                     else
-                        writer.WriteLitteral(assignExpr.Member.Name);
+                        writer.WriteLiteral(assignExpr.Member.Name);
 
                     writer.Write(':');
                     context.Visitor.Visit(assignExpr.Expression);

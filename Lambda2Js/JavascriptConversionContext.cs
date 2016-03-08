@@ -72,6 +72,11 @@ namespace Lambda2Js
 
         public JavascriptCompilationOptions Options { get; private set; }
 
+        /// <summary>
+        /// Gets a JavaScript writer, to output JavaScript code as the result of a node conversion.
+        /// When this method is used, it marks the context as being used already,
+        /// so that the node is not compiled again by any other extension or default behavior of the converter.
+        /// </summary>
         public JavascriptWriter GetWriter()
         {
             this.gotWriter = true;

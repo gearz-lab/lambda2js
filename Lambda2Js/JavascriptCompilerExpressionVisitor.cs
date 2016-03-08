@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -159,6 +158,7 @@ namespace Lambda2Js
             this.result.Write('"');
             this.result.Write(
                 str
+                    .Replace("\\", "\\\\")
                     .Replace("\r", "\\r")
                     .Replace("\n", "\\n")
                     .Replace("\t", "\\t")
@@ -794,84 +794,6 @@ namespace Lambda2Js
         protected override MemberBinding VisitMemberBinding(MemberBinding node)
         {
             return node;
-        }
-    }
-
-    internal static class TypeHelpers
-    {
-        private static readonly Type[] numTypes = new[]
-            {
-                typeof(short),
-                typeof(int),
-                typeof(long),
-                typeof(ushort),
-                typeof(uint),
-                typeof(ulong),
-                typeof(short),
-                typeof(byte),
-                typeof(sbyte),
-                typeof(float),
-                typeof(double),
-                typeof(decimal)
-            };
-
-        public static bool IsNumericType(Type type)
-        {
-            return Array.IndexOf(numTypes, type) >= 0;
-        }
-
-        public static bool IsDictionaryType([NotNull] Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
-            if (typeof(IDictionary).IsAssignableFrom(type))
-                return true;
-
-            if (type.IsGenericType)
-            {
-                var generic = type.GetGenericTypeDefinition();
-                if (typeof(IDictionary<,>).IsAssignableFrom(generic))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public static bool IsListType([NotNull] Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
-            if (typeof(ICollection).IsAssignableFrom(type))
-                return true;
-
-            if (type.IsGenericType)
-            {
-                var generic = type.GetGenericTypeDefinition();
-                if (typeof(ICollection<>).IsAssignableFrom(generic))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public static bool IsEnumerableType(Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
-            if (typeof(IEnumerable).IsAssignableFrom(type))
-                return true;
-
-            if (type.IsGenericType)
-            {
-                var generic = type.GetGenericTypeDefinition();
-                if (typeof(IEnumerable<>).IsAssignableFrom(generic))
-                    return true;
-            }
-
-            return false;
         }
     }
 }

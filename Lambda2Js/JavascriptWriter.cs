@@ -61,11 +61,40 @@ namespace Lambda2Js
         /// <summary>
         /// Writes a single character to the output.
         /// </summary>
-        /// <param name="p">Character to write to the output.</param>
+        /// <param name="ch">Character to write to the output.</param>
         /// <returns>The <see cref="JavascriptWriter"/>, allowing a fluent style.</returns>
-        public JavascriptWriter Write(char p)
+        public JavascriptWriter Write(char ch)
         {
-            this.result.Append(p);
+            this.result.Append(ch);
+            return this;
+        }
+
+        /// <summary>
+        /// Writes a literal value to the output.
+        /// </summary>
+        /// <param name="value">Value to write.</param>
+        /// <returns>The <see cref="JavascriptWriter"/>, allowing a fluent style.</returns>
+        public JavascriptWriter WriteLiteral(object value)
+        {
+            if (value is string || value is char)
+            {
+                this.result.Append('"');
+                this.result.Append(value.ToString()
+                    .Replace("\\", "\\\\")
+                    .Replace("\r", "\\r")
+                    .Replace("\n", "\\n")
+                    .Replace("\t", "\\t")
+                    .Replace("\0", "\\0")
+                    .Replace("\"", "\\\""));
+                this.result.Append('"');
+            }
+            else if (TypeHelpers.IsNumericType(value.GetType()))
+            {
+                if (TypeHelpers.IsIntegerType(value.GetType()))
+                    this.result.Append(value);
+                else if (value is float || value is double || value is decimal)
+                    this.result.AppendFormat("{0:E}", value);
+            }
             return this;
         }
 
