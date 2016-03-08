@@ -33,8 +33,54 @@ namespace Lambda2Js
         {
         }
 
-        public JavascriptCompilationOptions(JsCompilationFlags flags, IEnumerable<JavascriptConversionExtension> extensions = null)
+        /// <summary>
+        /// Creates an instance of the <see cref="JavascriptCompilationOptions"/> object.
+        /// </summary>
+        /// <param name="extensions">Extensions to the compilation.</param>
+        public JavascriptCompilationOptions(
+            params JavascriptConversionExtension[] extensions)
+            : this(JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter, (IEnumerable<JavascriptConversionExtension>)extensions)
         {
+        }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="JavascriptCompilationOptions"/> object.
+        /// </summary>
+        /// <param name="flags">JavaScript compilation flags.</param>
+        /// <param name="scriptVersion">Target version of the compiled JavaScript.</param>
+        /// <param name="extensions">Extensions to the compilation.</param>
+        public JavascriptCompilationOptions(
+            JsCompilationFlags flags,
+            ScriptVersion scriptVersion,
+            params JavascriptConversionExtension[] extensions)
+            : this(flags, extensions, scriptVersion)
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="JavascriptCompilationOptions"/> object.
+        /// </summary>
+        /// <param name="scriptVersion">Target version of the compiled JavaScript.</param>
+        /// <param name="extensions">Extensions to the compilation.</param>
+        public JavascriptCompilationOptions(
+            ScriptVersion scriptVersion,
+            params JavascriptConversionExtension[] extensions)
+            : this(JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter, extensions, scriptVersion)
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="JavascriptCompilationOptions"/> object.
+        /// </summary>
+        /// <param name="flags">JavaScript compilation flags.</param>
+        /// <param name="scriptVersion">Target version of the compiled JavaScript.</param>
+        /// <param name="extensions">Extensions to the compilation.</param>
+        public JavascriptCompilationOptions(
+            JsCompilationFlags flags,
+            IEnumerable<JavascriptConversionExtension> extensions = null,
+            ScriptVersion scriptVersion = ScriptVersion.Es50)
+        {
+            this.ScriptVersion = scriptVersion;
             this.BodyOnly = (flags & JsCompilationFlags.BodyOnly) != 0;
             this.ScopeParameter = (flags & JsCompilationFlags.ScopeParameter) != 0;
             this.Extensions = extensions == null
@@ -55,6 +101,11 @@ namespace Lambda2Js
         /// <para>function(x,y){return x+y;}</para>
         /// </summary>
         public bool ScopeParameter { get; private set; }
+
+        /// <summary>
+        /// Gets the target version of the generated script.
+        /// </summary>
+        public ScriptVersion ScriptVersion { get; private set; }
 
         public IEnumerable<JavascriptConversionExtension> Extensions { get; private set; }
     }
