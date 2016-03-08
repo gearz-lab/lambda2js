@@ -50,3 +50,8 @@ Clone using `ToArray` and targeting ES6:
         ScriptVersion.Es60,
         new JavascriptCompilationOptions(new LinqMethods()));
     // js = [...array]
+
+Developing custom plugins
+--------
+
+You can develop and use some prebuilt plugins. See the [readme.md in the Plugins folder](https://github.com/gearz-lab/lambda2js/tree/master/Lambda2Js/Plugins).
