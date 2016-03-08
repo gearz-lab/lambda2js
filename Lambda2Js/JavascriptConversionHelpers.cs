@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace Lambda2Js
@@ -161,6 +162,43 @@ namespace Lambda2Js
         public static JavascriptConversionContext WriteFormat(this JavascriptConversionContext context, string format, params object[] values)
         {
             context.GetWriter().WriteFormat(format, values);
+            return context;
+        }
+
+        /// <summary>
+        /// Writes a property accessor.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="propertyName">The property to access. Anything that can be converted to a string.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static JavascriptConversionContext WriteAccessor(
+            [NotNull] this JavascriptConversionContext context,
+            [NotNull] string propertyName)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            if (propertyName == null)
+                throw new ArgumentNullException(nameof(propertyName));
+
+            if (Regex.IsMatch(propertyName, @"^\w[\d\w]*$"))
+            {
+                context.GetWriter().Write('.');
+                context.GetWriter().Write(propertyName);
+            }
+            else if (Regex.IsMatch(propertyName, @"^\d+$"))
+            {
+                context.GetWriter().Write('[');
+                context.GetWriter().Write(propertyName);
+                context.GetWriter().Write(']');
+            }
+            else
+            {
+                context.GetWriter().Write('[');
+                context.GetWriter().WriteLiteral(propertyName);
+                context.GetWriter().Write(']');
+            }
+
             return context;
         }
     }

@@ -46,7 +46,7 @@ namespace Lambda2Js.Tests
                                 using (context.Operation(JavascriptOperationTypes.Call))
                                 {
                                     using (context.Operation(JavascriptOperationTypes.IndexerProperty))
-                                        context.Write("Xpto.GetValue");
+                                        context.Write("Xpto").WriteAccessor("GetValue");
 
                                     context.WriteManyIsolated('(', ')', ',', methodCall.Arguments);
                                 }
