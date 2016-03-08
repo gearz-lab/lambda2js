@@ -35,8 +35,17 @@ Converting lambda with LINQ expression, containing a inner lambda:
 
 Converting lambda with Linq `Select` method:
 
+	Expression<Func<string[], IEnumerable<char>>> expr = array => array.Select(x => x[0]);
     var js = expr.CompileToJavascript(
         new JavascriptCompilationOptions(
             JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
             new[] { new LinqMethods(), }));
     // js = array.map(function(x){return x[0];})
+
+Clone using `ToArray` and targeting ES6:
+
+    Expression<Func<string[], IEnumerable<string>>> expr = array => array.ToArray();
+    var js = expr.Body.CompileToJavascript(
+        ScriptVersion.Es60,
+        new JavascriptCompilationOptions(new LinqMethods()));
+    // js = [...array]
