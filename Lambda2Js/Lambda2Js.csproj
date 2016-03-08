@@ -47,6 +47,7 @@
     <Compile Include="JsCompilationFlags.cs" />
     <Compile Include="JavascriptCompilationOptions.cs" />
     <Compile Include="JsOperationHelper.cs" />
+    <Compile Include="MemberInitAsJson.cs" />
     <Compile Include="ScriptVersion.cs" />
     <Compile Include="LambdaExpressionExtensions.cs" />
     <Compile Include="PrecedenceController.cs" />

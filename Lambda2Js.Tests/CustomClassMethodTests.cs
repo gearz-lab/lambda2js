@@ -9,6 +9,10 @@ namespace Lambda2Js.Tests
     {
         public class MyCustomClass
         {
+            public MyCustomClass()
+            {
+            }
+
             public static int GetValue()
             {
                 return 1;
@@ -18,6 +22,8 @@ namespace Lambda2Js.Tests
             {
                 return x + 1;
             }
+
+            public string Name { get; set; }
         }
 
         public class MyCustomClassMethods : JavascriptConversionExtension
@@ -73,6 +79,18 @@ namespace Lambda2Js.Tests
                     new StaticStringMethods()));
 
             Assert.AreEqual("''+Xpto.GetValue()", js);
+        }
+
+        [TestMethod]
+        public void NewCustomClassAsJson()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass { Name = "Miguel" };
+
+            var js = expr.Body.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    new MemberInitAsJson(typeof(MyCustomClass))));
+
+            Assert.AreEqual("{Name:\"Miguel\"}", js);
         }
     }
 }
