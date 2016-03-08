@@ -382,12 +382,14 @@ namespace Lambda2Js
 
             using (this.result.Operation(node))
             {
+                var metadataProvider = this.Options.MetadataProvider ?? JavascriptMetadataProvider.Default;
                 var pos = this.result.Length;
                 if (node.Expression == null)
                 {
                     var decl = node.Member.DeclaringType;
                     if (decl != null)
                     {
+                        // TODO: there should be a way to customize the name of types through metadata
                         this.result.Write(decl.FullName);
                         this.result.Write('.');
                         this.result.Write(decl.Name);
@@ -398,15 +400,15 @@ namespace Lambda2Js
                 else
                 {
                     this.usedScopeMembers = this.usedScopeMembers ?? new List<string>();
-                    this.usedScopeMembers.Add(node.Member.Name);
+                    var meta = metadataProvider.GetMemberMetadata(node.Member);
+                    this.usedScopeMembers.Add(meta?.MemberName ?? node.Member.Name);
                 }
 
                 if (this.result.Length > pos)
                     this.result.Write('.');
 
                 var propInfo = node.Member as PropertyInfo;
-                if (propInfo != null
-                    && propInfo.DeclaringType != null
+                if (propInfo?.DeclaringType != null
                     && node.Type == typeof(int)
                     && node.Member.Name == "Count"
                     && TypeHelpers.IsListType(propInfo.DeclaringType))
@@ -415,7 +417,8 @@ namespace Lambda2Js
                 }
                 else
                 {
-                    this.result.Write(node.Member.Name);
+                    var meta = metadataProvider.GetMemberMetadata(node.Member);
+                    this.result.Write(meta?.MemberName ?? node.Member.Name);
                 }
 
                 return node;

@@ -19,6 +19,7 @@ namespace Lambda2Js
             this.BodyOnly = true;
             this.ScopeParameter = true;
             this.Extensions = Enumerable.Empty<JavascriptConversionExtension>();
+            this.ScriptVersion = ScriptVersion.Es50;
         }
 
         /// <summary>
@@ -108,5 +109,7 @@ namespace Lambda2Js
         public ScriptVersion ScriptVersion { get; private set; }
 
         public IEnumerable<JavascriptConversionExtension> Extensions { get; private set; }
+
+        public JavascriptMetadataProvider MetadataProvider { get; set; }
     }
 }

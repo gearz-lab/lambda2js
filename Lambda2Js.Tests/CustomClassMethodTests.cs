@@ -1,6 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 
 namespace Lambda2Js.Tests
 {
@@ -29,6 +30,12 @@ namespace Lambda2Js.Tests
             }
 
             public string Name { get; set; }
+
+            [JavascriptMember(MemberName = "otherName")]
+            public string Custom { get; set; }
+
+            [JsonProperty(PropertyName = "otherName2")]
+            public string Custom2 { get; set; }
         }
 
         public class MyCustomClassMethods : JavascriptConversionExtension
@@ -124,6 +131,22 @@ namespace Lambda2Js.Tests
             }
 
             Assert.IsInstanceOfType(exception, typeof(NotSupportedException), "Exception not thrown.");
+        }
+
+        [TestMethod]
+        public void CustomMetadata1()
+        {
+            Expression<Func<MyCustomClass, string>> expr = o => o.Custom;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"otherName", js);
+        }
+
+        [TestMethod]
+        public void CustomMetadata2()
+        {
+            Expression<Func<MyCustomClass, string>> expr = o => o.Custom2;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"otherName2", js);
         }
     }
 }

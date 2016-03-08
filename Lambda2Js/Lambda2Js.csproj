@@ -36,10 +36,14 @@
     <DocumentationFile>bin\Release\Lambda2Js.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AttributeJavascriptMetadataProvider.cs" />
+    <Compile Include="IJavascriptMemberMetadata.cs" />
     <Compile Include="JavascriptCompilerExpressionVisitor.cs" />
     <Compile Include="JavascriptConversionContext.cs" />
     <Compile Include="JavascriptConversionExtension.cs" />
     <Compile Include="JavascriptConversionHelpers.cs" />
+    <Compile Include="JavascriptMetadataProvider.cs" />
+    <Compile Include="JavascriptMemberAttribute.cs" />
     <Compile Include="JavascriptSyntax.cs" />
     <Compile Include="JavascriptWriter.cs" />
     <Compile Include="JavascriptOperationTypes.cs" />
@@ -48,6 +52,7 @@
     <Compile Include="JavascriptCompilationOptions.cs" />
     <Compile Include="JsOperationHelper.cs" />
     <Compile Include="Plugins\MemberInitAsJson.cs" />
+    <Compile Include="PropertyInfoExtensions.cs" />
     <Compile Include="ScriptVersion.cs" />
     <Compile Include="LambdaExpressionExtensions.cs" />
     <Compile Include="PrecedenceController.cs" />
