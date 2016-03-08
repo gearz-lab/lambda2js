@@ -27,8 +27,8 @@ namespace Lambda2Js
 
             var visitor =
                 new JavascriptCompilerExpressionVisitor(
-                    options.ScopeParameter ? expr.Parameters.SingleOrDefault() : null,
                     options.Extensions);
+                    options.ScopeParameter ? expr.Parameters.Single() : null,
 
             visitor.Visit(options.BodyOnly || options.ScopeParameter ? expr.Body : expr);
             if (!options.BodyOnly && options.ScopeParameter)
