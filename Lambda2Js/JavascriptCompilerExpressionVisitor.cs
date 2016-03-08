@@ -22,11 +22,22 @@ namespace Lambda2Js
 
         public JavascriptCompilerExpressionVisitor(
             ParameterExpression contextParameter,
-            IEnumerable<JavascriptConversionExtension> extensions)
+            IEnumerable<JavascriptConversionExtension> extensions,
+            [NotNull] JavascriptCompilationOptions options)
         {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            this.Options = options;
             this.contextParameter = contextParameter;
             this.extensions = extensions;
         }
+
+        /// <summary>
+        /// Gets the user options.
+        /// </summary>
+        [NotNull]
+        public JavascriptCompilationOptions Options { get; private set; }
 
         /// <summary>
         /// Gets the resulting JavaScript code.
@@ -41,7 +52,7 @@ namespace Lambda2Js
 
         public override Expression Visit(Expression node)
         {
-            var context = new JavascriptConversionContext(node, this, this.result);
+            var context = new JavascriptConversionContext(node, this, this.result, this.Options);
             foreach (var each in this.extensions)
             {
                 each.ConvertToJavascript(context);

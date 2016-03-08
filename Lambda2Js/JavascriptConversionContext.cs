@@ -19,7 +19,8 @@ namespace Lambda2Js
         public JavascriptConversionContext(
             [NotNull] Expression node,
             [NotNull] ExpressionVisitor visitor,
-            [NotNull] JavascriptWriter result)
+            [NotNull] JavascriptWriter result,
+            [NotNull] JavascriptCompilationOptions options)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
@@ -27,8 +28,11 @@ namespace Lambda2Js
                 throw new ArgumentNullException(nameof(visitor));
             if (result == null)
                 throw new ArgumentNullException(nameof(result));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
             this.result = result;
             this.Visitor = visitor;
+            this.Options = options;
             this.node = node;
         }
 
@@ -65,6 +69,8 @@ namespace Lambda2Js
         }
 
         public ExpressionVisitor Visitor { get; private set; }
+
+        public JavascriptCompilationOptions Options { get; private set; }
 
         public JavascriptWriter GetWriter()
         {
