@@ -11,9 +11,10 @@ It can be extended to customize the mapping of expressions:
  - support custom static methods, instead of emiting code that would otherwise depend on external javascript
  - support custom types, converting method calls and properties accordingly
 
-It is well tesded, and won't break.
+It is well tesded, and won't break. **More than 70 tests passing**.
 
-This project will use Semantic versioning.
+This project uses Semantic versioning.
+
 Installing [NuGet package](https://www.nuget.org/packages/Lambda2Js):
 
     PM> Install-Package Lambda2Js
