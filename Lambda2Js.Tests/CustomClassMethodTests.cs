@@ -9,6 +9,11 @@ namespace Lambda2Js.Tests
     {
         public class MyCustomClass
         {
+            public MyCustomClass(string name)
+            {
+                this.Name = name;
+            }
+
             public MyCustomClass()
             {
             }
@@ -91,6 +96,16 @@ namespace Lambda2Js.Tests
                     new MemberInitAsJson(typeof(MyCustomClass))));
 
             Assert.AreEqual("{Name:\"Miguel\"}", js);
+        }
+
+        [TestMethod]
+        public void NewCustomClassAsNewOfType()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass("Miguel");
+
+            var js = expr.Body.CompileToJavascript();
+
+            Assert.AreEqual("new Lambda2Js.Tests.CustomClassMethodTests.MyCustomClass(\"Miguel\")", js);
         }
     }
 }

@@ -523,11 +523,34 @@ namespace Lambda2Js
 
                     this.result.Write('}');
                 }
-
-                return node;
             }
+            else if (node.Type != typeof(Regex))
+            {
+                using (this.result.Operation(0))
+                {
+                    this.result.Write("new");
+                    this.result.Write(' ');
+                    using (this.result.Operation(JavascriptOperationTypes.Call))
+                    {
+                        using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
+                            this.result.Write(node.Type.FullName.Replace('+', '.'));
 
-            if (node.Type == typeof(Regex))
+                        this.result.Write('(');
+
+                        var posStart = this.result.Length;
+                        foreach (var argExpr in node.Arguments)
+                        {
+                            if (this.result.Length > posStart)
+                                this.result.Write(',');
+
+                            this.Visit(argExpr);
+                        }
+
+                        this.result.Write(')');
+                    }
+                }
+            }
+            else
             {
                 // To run the regex use this code:
                 // var lambda = Expression.Lambda<Func<Regex>>(node);
