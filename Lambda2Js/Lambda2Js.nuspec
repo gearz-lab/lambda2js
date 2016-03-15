@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.3.0</version>
+    <version>1.4.1</version>
     <title>lambda2js (ExpressionTree to JavaScript)</title>
     <authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</authors>
     <owners>Gearz</owners>
@@ -21,11 +21,12 @@
         Added `System.Linq` static members.
         ES6: arrow function, array spread.
         Added support for new operator with member init.
+        Added support for custom member names.
         See the project page for more.
     </releaseNotes>
     <copyright>Copyright Gearz 2016</copyright>
     <tags>
-        Expression Tree ExpressionTree JavaScript ECMA script converter gearz miguel angelo andre pena
+        Expression Tree ExpressionTree JavaScript ECMA script ES5 ES6 converter gearz miguel angelo andre pena
     </tags>
   </metadata>
 </package>
