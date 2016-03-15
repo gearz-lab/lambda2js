@@ -48,7 +48,7 @@ namespace Lambda2Js.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.Phones.Where(p => p.DDD == 21);
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("System.Linq.Enumerable.Where(Phones,function(p){return p.DDD==21;})", js);
+            Assert.AreEqual("System.Linq.Enumerable.Where(Phones,function(p){return p.DDD===21;})", js);
         }
 
         [TestMethod]
@@ -112,7 +112,7 @@ namespace Lambda2Js.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 || x.Phones.Length != 1;
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("PhonesByName[\"Miguel\"].DDD==32||Phones.length!=1", js);
+            Assert.AreEqual("PhonesByName[\"Miguel\"].DDD===32||Phones.length!==1", js);
         }
 
         [TestMethod]
@@ -120,7 +120,7 @@ namespace Lambda2Js.Tests
         {
             Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 | x.Phones.Length != 1;
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("PhonesByName[\"Miguel\"].DDD==32|Phones.length!=1", js);
+            Assert.AreEqual("PhonesByName[\"Miguel\"].DDD===32|Phones.length!==1", js);
         }
 
         [TestMethod]

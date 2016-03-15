@@ -19,7 +19,7 @@ namespace Lambda2Js.Tests
                     JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
                     new[] { new LinqMethods(), }));
 
-            Assert.AreEqual("array.filter(function(x){return x==\"Miguel\";})", js);
+            Assert.AreEqual("array.filter(function(x){return x===\"Miguel\";})", js);
         }
 
         [TestMethod]
