@@ -249,7 +249,7 @@ namespace Lambda2Js
                 case ExpressionType.Dynamic:
                     break;
                 case ExpressionType.Equal:
-                    result.Append("==");
+                    result.Append("===");
                     break;
                 case ExpressionType.ExclusiveOr:
                     result.Append("^");
@@ -333,7 +333,7 @@ namespace Lambda2Js
                     result.Append("!");
                     break;
                 case ExpressionType.NotEqual:
-                    result.Append("!=");
+                    result.Append("!==");
                     break;
                 case ExpressionType.OnesComplement:
                     result.Append("~");
