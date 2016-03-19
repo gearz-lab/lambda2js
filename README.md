@@ -26,7 +26,7 @@ Converting lambda with boolean and numeric operations:
 
     Expression<Func<MyClass, object>> expr = x => x.PhonesByName["Miguel"].DDD == 32 || x.Phones.Length != 1;
     var js = expr.CompileToJavascript();
-    // js = PhonesByName["Miguel"].DDD==32||Phones.length!=1
+    // js = PhonesByName["Miguel"].DDD===32||Phones.length!==1
 
 Converting lambda with LINQ expression, containing a inner lambda:
 
