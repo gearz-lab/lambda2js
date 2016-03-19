@@ -16,6 +16,10 @@ namespace Lambda2Js
 
         public static readonly MemberInitAsJson ForAllTypes = new MemberInitAsJson();
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="MemberInitAsJson"/>,
+        /// so that member initializations of types in `newObjectTypes` are converted to JSON.
+        /// </summary>
         public MemberInitAsJson([NotNull] params Type[] newObjectTypes)
         {
             if (newObjectTypes == null)
@@ -26,10 +30,18 @@ namespace Lambda2Js
             this.NewObjectTypes = newObjectTypes;
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="MemberInitAsJson"/>,
+        /// so that member initializations of any types are converted to JSON.
+        /// </summary>
         private MemberInitAsJson()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="MemberInitAsJson"/>,
+        /// so that member initializations of types that pass the `typePredicate` criteria are converted to JSON.
+        /// </summary>
         public MemberInitAsJson([NotNull] Predicate<Type> typePredicate)
         {
             if (typePredicate == null)
@@ -43,7 +55,10 @@ namespace Lambda2Js
             var initExpr = context.Node as MemberInitExpression;
             if (initExpr == null)
                 return;
-            if (!this.NewObjectTypes.Contains(initExpr.Type))
+            var typeOk1 = this.NewObjectTypes?.Contains(initExpr.Type) ?? false;
+            var typeOk2 = this.TypePredicate?.Invoke(initExpr.Type) ?? false;
+            var typeOk3 = this.NewObjectTypes == null && this.TypePredicate == null;
+            if (!typeOk1 && !typeOk2 && !typeOk3)
                 return;
             if (initExpr.NewExpression.Arguments.Count > 0)
                 return;
