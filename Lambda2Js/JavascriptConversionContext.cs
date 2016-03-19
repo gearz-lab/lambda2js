@@ -10,7 +10,7 @@ namespace Lambda2Js
         private readonly JavascriptWriter result;
 
         [NotNull]
-        private readonly Expression node;
+        private Expression node;
 
         internal bool preventDefault;
 
