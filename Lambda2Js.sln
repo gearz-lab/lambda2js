@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lambda2Js", "Lambda2Js\Lamb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lambda2Js.Tests", "Lambda2Js.Tests\Lambda2Js.Tests.csproj", "{728483B9-73EA-4EF6-94CC-22D1E5053A29}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.NuGet.Net-v4.0", "Test.NuGet.Net-v4.0\Test.NuGet.Net-v4.0.csproj", "{73500DC0-3403-415C-9360-B82DCC78EFBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{728483B9-73EA-4EF6-94CC-22D1E5053A29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{728483B9-73EA-4EF6-94CC-22D1E5053A29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{728483B9-73EA-4EF6-94CC-22D1E5053A29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73500DC0-3403-415C-9360-B82DCC78EFBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73500DC0-3403-415C-9360-B82DCC78EFBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73500DC0-3403-415C-9360-B82DCC78EFBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73500DC0-3403-415C-9360-B82DCC78EFBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
