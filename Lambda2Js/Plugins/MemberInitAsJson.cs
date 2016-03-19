@@ -8,8 +8,10 @@ namespace Lambda2Js
 {
     public class MemberInitAsJson : JavascriptConversionExtension
     {
+        [CanBeNull]
         public Predicate<Type> TypePredicate { get; }
 
+        [CanBeNull]
         public Type[] NewObjectTypes { get; }
 
         public static readonly MemberInitAsJson ForAllTypes = new MemberInitAsJson();
@@ -32,6 +34,7 @@ namespace Lambda2Js
         {
             if (typePredicate == null)
                 throw new ArgumentNullException(nameof(typePredicate));
+
             this.TypePredicate = typePredicate;
         }
 

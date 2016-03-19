@@ -5,7 +5,7 @@ namespace Lambda2Js
     /// <summary>
     /// Attribute containing metadata for JavaScript conversion.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
     public class JavascriptMemberAttribute : Attribute,
         IJavascriptMemberMetadata
     {

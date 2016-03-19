@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
+#pragma warning disable 1591
 namespace Lambda2Js
 {
     /// <summary>
@@ -582,6 +583,7 @@ namespace Lambda2Js
 
                     // creating a Regex object with `ECMAScript` to make sure the pattern is valid in JavaScript.
                     // If it is not valid, then an exception is thrown.
+                    // ReSharper disable once UnusedVariable
                     var ecmaRegex = new Regex(pattern, options | RegexOptions.ECMAScript);
                 }
                 else
