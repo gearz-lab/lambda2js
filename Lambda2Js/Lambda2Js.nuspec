@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <title>lambda2js (ExpressionTree to JavaScript)</title>
     <authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</authors>
     <owners>Gearz</owners>
