@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.4.3</version>
+    <version>1.5.0</version>
     <title>lambda2js (ExpressionTree to JavaScript)</title>
     <authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</authors>
     <owners>Gearz</owners>
@@ -10,12 +10,16 @@
     <projectUrl>https://github.com/gearz-lab/lambda2js</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/gearz-lab/lambda2js/master/Lambda2Js/icon-256.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>
+        Portable lambda expression to JavaScript converter.
+    </summary>
     <description>
         Portable lambda expression to JavaScript converter.
         Converts System.Linq.ExpressionTree to syntactically correct JavaScript code.
         See the project page for more.
     </description>
     <releaseNotes>
+        1.5.0 - better metadata system; metadata bug repaired
         Portable `lambda2js` Lambda expression to JavaScript converter.
         Added `Math` static members.
         Added `System.Linq` static members.
