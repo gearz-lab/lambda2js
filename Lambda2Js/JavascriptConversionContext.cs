@@ -60,16 +60,18 @@ namespace Lambda2Js
                 this.node = value;
             }
 #endif
-            #endregion
-        }
+#endregion
+            }
 
         public void PreventDefault()
         {
             this.preventDefault = true;
         }
 
+        [NotNull]
         public ExpressionVisitor Visitor { get; private set; }
 
+        [NotNull]
         public JavascriptCompilationOptions Options { get; private set; }
 
         /// <summary>

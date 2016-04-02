@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -383,7 +384,7 @@ namespace Lambda2Js
 
             using (this.result.Operation(node))
             {
-                var metadataProvider = this.Options.MetadataProvider ?? JavascriptMetadataProvider.Default;
+                var metadataProvider = this.Options.GetMetadataProvider();
                 var pos = this.result.Length;
                 if (node.Expression == null)
                 {
@@ -402,6 +403,7 @@ namespace Lambda2Js
                 {
                     this.usedScopeMembers = this.usedScopeMembers ?? new List<string>();
                     var meta = metadataProvider.GetMemberMetadata(node.Member);
+                    Debug.Assert(!string.IsNullOrEmpty(meta?.MemberName), "!string.IsNullOrEmpty(meta?.MemberName)");
                     this.usedScopeMembers.Add(meta?.MemberName ?? node.Member.Name);
                 }
 
@@ -419,7 +421,8 @@ namespace Lambda2Js
                 else
                 {
                     var meta = metadataProvider.GetMemberMetadata(node.Member);
-                    this.result.Write(meta?.MemberName ?? node.Member.Name);
+                    Debug.Assert(!string.IsNullOrEmpty(meta?.MemberName), "!string.IsNullOrEmpty(meta?.MemberName)");
+                    this.result.Write(meta?.MemberName);
                 }
 
                 return node;

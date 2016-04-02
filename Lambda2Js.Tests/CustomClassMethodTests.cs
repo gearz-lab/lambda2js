@@ -106,6 +106,19 @@ namespace Lambda2Js.Tests
         }
 
         [TestMethod]
+        public void NewClassAsJson()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass { Name = "Miguel" };
+
+            var js = expr.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    (JsCompilationFlags)0,
+                    MemberInitAsJson.ForAllTypes));
+
+            Assert.AreEqual("function(){return {Name:\"Miguel\"};}", js);
+        }
+
+        [TestMethod]
         public void NewCustomClassAsNewOfType()
         {
             Expression<Func<MyCustomClass>> expr = () => new MyCustomClass("Miguel");

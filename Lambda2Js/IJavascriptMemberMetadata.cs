@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+
 namespace Lambda2Js
 {
     /// <summary>
@@ -8,6 +10,7 @@ namespace Lambda2Js
         /// <summary>
         /// Gets or sets the name of the property when converted to JavaScript.
         /// </summary>
+        [NotNull]
         string MemberName { get; }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Lambda2Js
 {
@@ -110,6 +111,15 @@ namespace Lambda2Js
 
         public IEnumerable<JavascriptConversionExtension> Extensions { get; private set; }
 
-        public JavascriptMetadataProvider MetadataProvider { get; set; }
+        /// <summary>
+        /// Gets or sets the metadata provider that should be used in the compilation process when information about types are needed.
+        /// </summary>
+        [CanBeNull]
+        public JavascriptMetadataProvider CustomMetadataProvider { get; set; }
+
+        public JavascriptMetadataProvider GetMetadataProvider()
+        {
+            return this.CustomMetadataProvider ?? JavascriptMetadataProvider.Default;
+        }
     }
 }
