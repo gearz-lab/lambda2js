@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
@@ -25,7 +26,7 @@ namespace Lambda2Js
             if (newObjectTypes == null)
                 throw new ArgumentNullException(nameof(newObjectTypes));
             if (newObjectTypes.Length == 0)
-                throw new ArgumentException("Argument is empty collection", nameof(newObjectTypes));
+                throw new ArgumentException("Argument is empty collection. Maybe you are looking for `MemberInitAsJson.ForAllTypes`.", nameof(newObjectTypes));
 
             this.NewObjectTypes = newObjectTypes;
         }
@@ -76,10 +77,14 @@ namespace Lambda2Js
                     if (writer.Length > posStart)
                         writer.Write(',');
 
-                    if (Regex.IsMatch(assignExpr.Member.Name, @"^\w[\d\w]*$"))
-                        writer.Write(assignExpr.Member.Name);
+                    var metadataProvider = context.Options.GetMetadataProvider();
+                    var meta = metadataProvider.GetMemberMetadata(assignExpr.Member);
+                    var memberName = meta?.MemberName;
+                    Debug.Assert(!string.IsNullOrEmpty(memberName), "!string.IsNullOrEmpty(memberName)");
+                    if (Regex.IsMatch(memberName, @"^\w[\d\w]*$"))
+                        writer.Write(memberName);
                     else
-                        writer.WriteLiteral(assignExpr.Member.Name);
+                        writer.WriteLiteral(memberName);
 
                     writer.Write(':');
                     context.Visitor.Visit(assignExpr.Expression);

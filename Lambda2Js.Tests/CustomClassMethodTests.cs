@@ -161,5 +161,34 @@ namespace Lambda2Js.Tests
             var js = expr.CompileToJavascript();
             Assert.AreEqual(@"otherName2", js);
         }
+
+        public class MyClassBase
+        {
+            [JsonProperty(PropertyName = "type")]
+            public string Type { get; set; }
+        }
+
+        public class MyClass : MyClassBase
+        {
+            [JsonProperty(PropertyName = "name")]
+            public string Name { get; set; }
+        }
+
+        public delegate object MyFuncDef(string name);
+
+        [TestMethod]
+        public void CustomMetadataInMemberInit()
+        {
+            Expression<MyFuncDef> expr = name => new MyClass
+            {
+                Type = "xpto",
+                Name = name,
+            };
+
+            var js = expr.CompileToJavascript(
+                    new JavascriptCompilationOptions((JsCompilationFlags)0, MemberInitAsJson.ForAllTypes));
+
+            Assert.AreEqual("function(name){return {type:\"xpto\",name:name};}", js);
+        }
     }
 }
