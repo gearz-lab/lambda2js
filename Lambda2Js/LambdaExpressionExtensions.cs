@@ -25,6 +25,9 @@ namespace Lambda2Js
 
             options = options ?? JavascriptCompilationOptions.DefaultOptions;
 
+            if (options.ScopeParameter && expr.Parameters.Count != 1)
+                throw new InvalidOperationException("When using ScopeParameter flag, the lambda expression must have one single argument.");
+
             var visitor =
                 new JavascriptCompilerExpressionVisitor(
                     options.ScopeParameter ? expr.Parameters.Single() : null,

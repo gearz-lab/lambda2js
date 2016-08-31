@@ -446,6 +446,23 @@ namespace Lambda2Js.Tests
             var js = expr.CompileToJavascript();
             Assert.AreEqual(@"(1.5+Age)+"":""+Name", js);
         }
+
+        [TestMethod]
+        public void CorrectUsageOfScopeParameterFlag()
+        {
+            Expression<Func<int>> expr = () => 1;
+            Exception getEx = null;
+            try
+            {
+                var js = expr.CompileToJavascript(new JavascriptCompilationOptions(JsCompilationFlags.ScopeParameter));
+            }
+            catch (Exception ex)
+            {
+                getEx = ex;
+            }
+
+            Assert.IsInstanceOfType(getEx, typeof(InvalidOperationException));
+        }
     }
 
     class MyClass
