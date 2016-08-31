@@ -471,6 +471,23 @@ namespace Lambda2Js.Tests
 
             Assert.IsInstanceOfType(getEx, typeof(InvalidOperationException));
         }
+
+        [TestMethod]
+        public void CannotSerializeUnknownConstant()
+        {
+            Expression<Func<Phone>> expr = Expression.Lambda<Func<Phone>>(Expression.Constant(new Phone()));
+            Exception getEx = null;
+            try
+            {
+                var js = expr.CompileToJavascript(new JavascriptCompilationOptions(JsCompilationFlags.BodyOnly));
+            }
+            catch (Exception ex)
+            {
+                getEx = ex;
+            }
+
+            Assert.IsInstanceOfType(getEx, typeof(NotSupportedException));
+        }
     }
 
     class MyClass

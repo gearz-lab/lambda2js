@@ -151,6 +151,8 @@ namespace Lambda2Js
             {
                 this.result.Write("null");
             }
+            else
+                throw new NotSupportedException("The used constant value is not supported: `" + node + "` (" + node.Type.Name + ")");
 
             return node;
         }
