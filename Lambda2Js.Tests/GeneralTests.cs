@@ -488,6 +488,19 @@ namespace Lambda2Js.Tests
 
             Assert.IsInstanceOfType(getEx, typeof(NotSupportedException));
         }
+
+        [TestMethod]
+        public void UseEnclosedValues()
+        {
+            int value = 0;
+            Expression<Func<int>> expr = () => value;
+            value = 1;
+            var js1 = expr.CompileToJavascript(new JavascriptCompilationOptions(JsCompilationFlags.BodyOnly));
+            value = 2;
+            var js2 = expr.CompileToJavascript(new JavascriptCompilationOptions(JsCompilationFlags.BodyOnly));
+            Assert.AreEqual(@"1", js1);
+            Assert.AreEqual(@"2", js2);
+        }
     }
 
     class MyClass

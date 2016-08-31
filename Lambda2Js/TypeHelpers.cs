@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
 namespace Lambda2Js
@@ -97,6 +99,24 @@ namespace Lambda2Js
                     return true;
             }
 
+            return false;
+        }
+
+        public static bool TestAttribute<T>(this Type type, [NotNull] Func<T, bool> predicate)
+            where T : Attribute
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            var attr = type.GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefault();
+            return attr != null && predicate(attr);
+        }
+
+        public static bool IsClosureRootType(this Type type)
+        {
+            if (type.Name.StartsWith("<>") == true)
+                if (type.TestAttribute((CompilerGeneratedAttribute a) => true))
+                    return true;
             return false;
         }
     }

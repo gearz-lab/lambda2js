@@ -138,6 +138,18 @@ namespace Lambda2Js
                 using (this.result.Operation(JavascriptOperationTypes.Literal))
                     this.WriteStringLiteral((string)node.Value);
             }
+            else if (node.Value == null)
+            {
+                this.result.Write("null");
+            }
+            else if (node.Type.IsEnum)
+            {
+                using (this.result.Operation(JavascriptOperationTypes.Literal))
+                {
+                    var underlyingType = Enum.GetUnderlyingType(node.Type);
+                    this.result.Write(Convert.ChangeType(node.Value, underlyingType, CultureInfo.InvariantCulture));
+                }
+            }
             else if (node.Type == typeof(Regex))
             {
                 using (this.result.Operation(JavascriptOperationTypes.Literal))
@@ -147,9 +159,9 @@ namespace Lambda2Js
                     this.result.Write("/g");
                 }
             }
-            else if (node.Value == null)
+            else if (node.Type.IsClosureRootType())
             {
-                this.result.Write("null");
+                // do nothing, this is a reference to the closure root object
             }
             else
                 throw new NotSupportedException("The used constant value is not supported: `" + node + "` (" + node.Type.Name + ")");
@@ -411,6 +423,13 @@ namespace Lambda2Js
 
                 if (this.result.Length > pos)
                     this.result.Write('.');
+
+                if (node.Expression?.Type.IsClosureRootType() == true)
+                {
+                    var cte = ((ConstantExpression)node.Expression).Value;
+                    var value = ((FieldInfo)node.Member).GetValue(cte);
+                    this.Visit(Expression.Constant(value, node.Type));
+                }
 
                 var propInfo = node.Member as PropertyInfo;
                 if (propInfo?.DeclaringType != null
