@@ -21,6 +21,7 @@ namespace Lambda2Js
             this.ScopeParameter = true;
             this.Extensions = Enumerable.Empty<JavascriptConversionExtension>();
             this.ScriptVersion = ScriptVersion.Es50;
+            this.UndefinedLiteral = "undefined";
         }
 
         /// <summary>
@@ -88,6 +89,7 @@ namespace Lambda2Js
             this.Extensions = extensions == null
                 ? Enumerable.Empty<JavascriptConversionExtension>()
                 : new ReadOnlyCollection<JavascriptConversionExtension>(extensions.ToArray());
+            this.UndefinedLiteral = "undefined";
         }
 
         /// <summary>
@@ -110,6 +112,12 @@ namespace Lambda2Js
         public ScriptVersion ScriptVersion { get; private set; }
 
         public IEnumerable<JavascriptConversionExtension> Extensions { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the literal used to represent undefined in javascript.
+        /// If anything but a literal is provided, then you should parenthesize the whole expression.
+        /// </summary>
+        public string UndefinedLiteral { get; set; }
 
         /// <summary>
         /// Gets or sets the metadata provider that should be used in the compilation process when information about types are needed.

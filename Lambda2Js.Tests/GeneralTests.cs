@@ -408,6 +408,14 @@ namespace Lambda2Js.Tests
         }
 
         [TestMethod]
+        public void NumLiteralToStringN4()
+        {
+            Expression<Func<string>> expr = () => 1.ToString("N4");
+            var js = expr.Body.CompileToJavascript();
+            Assert.AreEqual("(1).toLocaleString(undefined,{minimumFractionDigits:4})", js);
+        }
+
+        [TestMethod]
         public void NumLiteralToStringX()
         {
             Expression<Func<string>> expr = () => 1.ToString("X");

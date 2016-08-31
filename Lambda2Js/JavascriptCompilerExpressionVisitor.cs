@@ -763,7 +763,16 @@ namespace Lambda2Js
                     else if (f == "F" || f == "G")
                         methodName = "toFixed(" + n + ")";
                     else if (f == "N")
-                        methodName = "toLocaleString()";
+                    {
+                        var undefined = this.Options.UndefinedLiteral;
+                        if (string.IsNullOrEmpty(n))
+                            methodName = "toLocaleString()";
+                        else
+                            methodName = string.Format(
+                                "toLocaleString({0},{{minimumFractionDigits:{1}}})",
+                                undefined,
+                                n);
+                    }
                     else if (f == "X")
                         methodName = "toString(16)";
                 }
