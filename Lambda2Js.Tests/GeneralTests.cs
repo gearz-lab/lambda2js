@@ -446,6 +446,15 @@ namespace Lambda2Js.Tests
             var js = expr.CompileToJavascript();
             Assert.AreEqual(@"(1.5+Age)+"":""+Name", js);
         }
+
+        [TestMethod]
+        public void ConditionalCheck()
+        {
+          Expression<Func<MyClass, string>> expr = o => o.Phones.Length > 0 && o.Age < 50 ? o.Name + " " + o.Phones.Length + " has phones and is " + o.Age + "yo" : "ignore";
+          var js = expr.CompileToJavascript();
+          Assert.AreEqual(@"Phones.length>0&&Age<50?Name+"" ""+Phones.length+"" has phones and is ""+Age+""yo"":""ignore""",js);
+
+        }
     }
 
     class MyClass
