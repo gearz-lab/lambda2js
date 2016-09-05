@@ -49,17 +49,18 @@ namespace Lambda2Js.Tests
                         switch (methodCall.Method.Name)
                         {
                             case "GetValue":
-                            {
-                                using (context.Operation(JavascriptOperationTypes.Call))
                                 {
-                                    using (context.Operation(JavascriptOperationTypes.IndexerProperty))
-                                        context.Write("Xpto").WriteAccessor("GetValue");
+                                    context.PreventDefault();
+                                    using (context.Operation(JavascriptOperationTypes.Call))
+                                    {
+                                        using (context.Operation(JavascriptOperationTypes.IndexerProperty))
+                                            context.Write("Xpto").WriteAccessor("GetValue");
 
-                                    context.WriteManyIsolated('(', ')', ',', methodCall.Arguments);
+                                        context.WriteManyIsolated('(', ')', ',', methodCall.Arguments);
+                                    }
+
+                                    return;
                                 }
-
-                                return;
-                            }
                         }
                     }
             }

@@ -10,11 +10,9 @@ namespace Lambda2Js
         private readonly JavascriptWriter result;
 
         [NotNull]
-        private Expression node;
+        private readonly Expression node;
 
         internal bool preventDefault;
-
-        internal bool gotWriter;
 
         public JavascriptConversionContext(
             [NotNull] Expression node,
@@ -47,21 +45,8 @@ namespace Lambda2Js
         [NotNull]
         public Expression Node
         {
-            get
-            {
-                return this.node;
-            }
-            #region Supported will be removed in v2
-#if V1
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("value");
-                this.node = value;
-            }
-#endif
-#endregion
-            }
+            get { return this.node; }
+        }
 
         public void PreventDefault()
         {
@@ -81,7 +66,6 @@ namespace Lambda2Js
         /// </summary>
         public JavascriptWriter GetWriter()
         {
-            this.gotWriter = true;
             return this.result;
         }
 

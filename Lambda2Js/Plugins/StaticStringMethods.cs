@@ -18,6 +18,7 @@ namespace Lambda2Js
                     {
                         case "Concat":
                             {
+                                context.PreventDefault();
                                 var writer = context.GetWriter();
                                 using (writer.Operation(JavascriptOperationTypes.Concat))
                                 {
@@ -36,6 +37,7 @@ namespace Lambda2Js
 
                         case "Join":
                             {
+                                context.PreventDefault();
                                 var writer = context.GetWriter();
                                 using (writer.Operation(JavascriptOperationTypes.Call))
                                 {

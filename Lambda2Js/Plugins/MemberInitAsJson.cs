@@ -66,6 +66,7 @@ namespace Lambda2Js
             if (initExpr.Bindings.Any(mb => mb.BindingType != MemberBindingType.Assignment))
                 return;
 
+            context.PreventDefault();
             var writer = context.GetWriter();
             using (writer.Operation(0))
             {

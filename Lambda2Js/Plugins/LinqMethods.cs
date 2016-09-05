@@ -19,6 +19,7 @@ namespace Lambda2Js
                     {
                         case "Select":
                             {
+                                context.PreventDefault();
                                 var writer = context.GetWriter();
                                 using (writer.Operation(JavascriptOperationTypes.Call))
                                 {
@@ -48,6 +49,7 @@ namespace Lambda2Js
 
                         case "Where":
                             {
+                                context.PreventDefault();
                                 var writer = context.GetWriter();
                                 using (writer.Operation(JavascriptOperationTypes.Call))
                                 {
@@ -81,6 +83,7 @@ namespace Lambda2Js
                                 // Other: use array `slice`
                                 if (context.Options.ScriptVersion.Supports(JavascriptSyntax.ArraySpread))
                                 {
+                                    context.PreventDefault();
                                     var writer = context.GetWriter();
                                     using (writer.Operation(0))
                                     {
@@ -93,6 +96,7 @@ namespace Lambda2Js
                                 }
                                 else
                                 {
+                                    context.PreventDefault();
                                     var writer = context.GetWriter();
                                     using (writer.Operation(JavascriptOperationTypes.Call))
                                     {

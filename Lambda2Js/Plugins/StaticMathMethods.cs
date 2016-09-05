@@ -106,6 +106,7 @@ namespace Lambda2Js
                     if (membersMap.TryGetValue(methodCall.Method.Name, out jsInfo))
                         if (methodCall.Arguments.Count == jsInfo.length)
                         {
+                            context.PreventDefault();
                             using (context.Operation(JavascriptOperationTypes.Call))
                             {
                                 using (context.Operation(JavascriptOperationTypes.IndexerProperty))
@@ -120,6 +121,7 @@ namespace Lambda2Js
                         {
                             // JavaScript does not support `Math.log` with 2 parameters,
                             // But it is easy enough for us to give a little help!
+                            context.PreventDefault();
                             using (context.Operation(JavascriptOperationTypes.MulDivMod))
                             {
                                 using (context.Operation(JavascriptOperationTypes.Call))
@@ -158,6 +160,7 @@ namespace Lambda2Js
                             //      Math.Round(A, B) => (function(a, b) { return Math.round(a * b) / b; })(A, Math.pow(10, B));
                             if (this.round2)
                             {
+                                context.PreventDefault();
                                 using (context.Operation(JavascriptOperationTypes.Call))
                                 {
                                     context.WriteLambda<Func<double, double, double>>((a, b) => Math.Round(a * b) / b);
@@ -192,11 +195,17 @@ namespace Lambda2Js
             var constVal = context.Node as ConstantExpression;
             if (constVal != null)
                 if (constVal.Value.Equals(Math.E))
+                {
+                    context.PreventDefault();
                     using (context.Operation(JavascriptOperationTypes.IndexerProperty))
                         context.Write("Math.E");
+                }
                 else if (constVal.Value.Equals(Math.PI))
+                {
+                    context.PreventDefault();
                     using (context.Operation(JavascriptOperationTypes.IndexerProperty))
                         context.Write("Math.PI");
+                }
         }
     }
 }

@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;V1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;V2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>2</WarningLevel>
     <DocumentationFile>bin\Debug\Lambda2Js.XML</DocumentationFile>

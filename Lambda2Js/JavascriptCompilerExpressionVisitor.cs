@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,7 +7,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 
 #pragma warning disable 1591
 namespace Lambda2Js
@@ -60,28 +60,11 @@ namespace Lambda2Js
             {
                 each.ConvertToJavascript(context);
 
-                #region Supported will be removed in v2
-#if V1
-                if (context.gotWriter && context.Node != node2)
-                    throw new Exception(
-                        "Cannot both write and return a new node. Either write javascript code, or return a new node.");
-#endif
-                #endregion
-                if (context.preventDefault || context.gotWriter)
+                if (context.preventDefault)
                 {
                     // canceling any further action with the current node
                     return node2;
                 }
-
-                #region Supported will be removed in v2
-#if V1
-                if (context.Node != node2)
-                {
-                    // a new node must be completelly revisited
-                    return this.Visit(context.Node);
-                }
-#endif
-                #endregion
             }
 
             // nothing happened, continue to the default conversion behavior
