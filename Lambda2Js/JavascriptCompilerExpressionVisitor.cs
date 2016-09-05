@@ -54,7 +54,6 @@ namespace Lambda2Js
         public override Expression Visit(Expression node)
         {
             var node2 = PreprocessNode(node);
-
             var context = new JavascriptConversionContext(node2, this, this.result, this.Options);
             foreach (var each in this.extensions)
             {
