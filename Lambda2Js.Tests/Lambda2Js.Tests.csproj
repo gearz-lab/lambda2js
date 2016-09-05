@@ -54,6 +54,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="EnumTests.cs" />
     <Compile Include="CustomClassMethodTests.cs" />
     <Compile Include="StaticMathMethodTests.cs" />
     <Compile Include="LinqMethodsTests.cs" />

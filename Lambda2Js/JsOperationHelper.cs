@@ -190,7 +190,7 @@ namespace Lambda2Js
             }
         }
 
-        public static void WriteOperator(StringBuilder result, ExpressionType nodeType)
+        public static void WriteOperator(StringBuilder result, ExpressionType nodeType, Type type)
         {
             switch (nodeType)
             {
@@ -330,7 +330,11 @@ namespace Lambda2Js
                 case ExpressionType.NewArrayInit:
                     break;
                 case ExpressionType.Not:
-                    result.Append("!");
+                    if (TypeHelpers.IsNumericType(type) || type.IsEnum)
+                        result.Append("~");
+                    else
+                        result.Append("!");
+
                     break;
                 case ExpressionType.NotEqual:
                     result.Append("!==");

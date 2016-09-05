@@ -16,16 +16,16 @@ namespace Lambda2Js
             this.operandTypes = operandTypes;
             this.op = op;
             operandTypes.Add(op);
-            this.WritePrecedenceChar('(');
+            this.WritePrecedenceCharIfNeeded('(');
         }
 
         public void Dispose()
         {
-            this.WritePrecedenceChar(')');
+            this.WritePrecedenceCharIfNeeded(')');
             this.operandTypes.RemoveAt(this.operandTypes.Count - 1);
         }
 
-        private void WritePrecedenceChar(char ch)
+        private void WritePrecedenceCharIfNeeded(char ch)
         {
             if (this.op != 0 && !this.CurrentHasPrecedence())
             {

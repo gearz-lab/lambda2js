@@ -103,9 +103,9 @@ namespace Lambda2Js
         /// </summary>
         /// <param name="expressionType">Expression type representing the operator to render..</param>
         /// <returns>The <see cref="JavascriptWriter"/>, allowing a fluent style.</returns>
-        public JavascriptWriter WriteOperator(ExpressionType expressionType)
+        public JavascriptWriter WriteOperator(ExpressionType expressionType, Type type)
         {
-            JsOperationHelper.WriteOperator(this.result, expressionType);
+            JsOperationHelper.WriteOperator(this.result, expressionType, type);
             return this;
         }
 

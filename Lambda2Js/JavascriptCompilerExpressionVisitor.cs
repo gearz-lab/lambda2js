@@ -104,7 +104,7 @@ namespace Lambda2Js
             using (this.result.Operation(node))
             {
                 this.Visit(node.Left);
-                this.result.WriteOperator(node.NodeType);
+                this.result.WriteOperator(node.NodeType, node.Type);
                 this.Visit(node.Right);
             }
 
@@ -462,10 +462,10 @@ namespace Lambda2Js
                 var isPostOp = JsOperationHelper.IsPostfixOperator(node.NodeType);
 
                 if (!isPostOp)
-                    this.result.WriteOperator(node.NodeType);
+                    this.result.WriteOperator(node.NodeType, node.Type);
                 this.Visit(node.Operand);
                 if (isPostOp)
-                    this.result.WriteOperator(node.NodeType);
+                    this.result.WriteOperator(node.NodeType, node.Type);
 
                 return node;
             }
