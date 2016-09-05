@@ -396,6 +396,7 @@ namespace Lambda2Js
                 }
             }
 
+            bool isClosure = false;
             using (this.result.Operation(node))
             {
                 var metadataProvider = this.Options.GetMetadataProvider();
@@ -411,6 +412,10 @@ namespace Lambda2Js
                         this.result.Write(decl.Name);
                     }
                 }
+                else if (node.Expression.Type.IsClosureRootType())
+                {
+                    isClosure = true;
+                }
                 else if (node.Expression != this.contextParameter)
                     this.Visit(node.Expression);
                 else
@@ -424,30 +429,33 @@ namespace Lambda2Js
                 if (this.result.Length > pos)
                     this.result.Write('.');
 
-                if (node.Expression?.Type.IsClosureRootType() == true)
+                if (!isClosure)
                 {
-                    var cte = ((ConstantExpression)node.Expression).Value;
-                    var value = ((FieldInfo)node.Member).GetValue(cte);
-                    this.Visit(Expression.Constant(value, node.Type));
+                    var propInfo = node.Member as PropertyInfo;
+                    if (propInfo?.DeclaringType != null
+                        && node.Type == typeof(int)
+                        && node.Member.Name == "Count"
+                        && TypeHelpers.IsListType(propInfo.DeclaringType))
+                    {
+                        this.result.Write("length");
+                    }
+                    else
+                    {
+                        var meta = metadataProvider.GetMemberMetadata(node.Member);
+                        Debug.Assert(!string.IsNullOrEmpty(meta?.MemberName), "!string.IsNullOrEmpty(meta?.MemberName)");
+                        this.result.Write(meta?.MemberName);
+                    }
                 }
-
-                var propInfo = node.Member as PropertyInfo;
-                if (propInfo?.DeclaringType != null
-                    && node.Type == typeof(int)
-                    && node.Member.Name == "Count"
-                    && TypeHelpers.IsListType(propInfo.DeclaringType))
-                {
-                    this.result.Write("length");
-                }
-                else
-                {
-                    var meta = metadataProvider.GetMemberMetadata(node.Member);
-                    Debug.Assert(!string.IsNullOrEmpty(meta?.MemberName), "!string.IsNullOrEmpty(meta?.MemberName)");
-                    this.result.Write(meta?.MemberName);
-                }
-
-                return node;
             }
+
+            if (isClosure)
+            {
+                var cte = ((ConstantExpression)node.Expression).Value;
+                var value = ((FieldInfo)node.Member).GetValue(cte);
+                this.Visit(Expression.Constant(value, node.Type));
+            }
+
+            return node;
         }
 
         protected override MemberAssignment VisitMemberAssignment(MemberAssignment node)
