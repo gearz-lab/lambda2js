@@ -51,6 +51,8 @@
     <Compile Include="JsCompilationFlags.cs" />
     <Compile Include="JavascriptCompilationOptions.cs" />
     <Compile Include="JsOperationHelper.cs" />
+    <Compile Include="Plugins\EnumConversionExtension.cs" />
+    <Compile Include="Plugins\EnumOptions.cs" />
     <Compile Include="Plugins\MemberInitAsJson.cs" />
     <Compile Include="PropertyInfoExtensions.cs" />
     <Compile Include="ScriptVersion.cs" />

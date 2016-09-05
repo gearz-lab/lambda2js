@@ -69,6 +69,11 @@ namespace Lambda2Js
             return this.result;
         }
 
+        public void WriteNode(Expression node)
+        {
+            this.Visitor.Visit(node);
+        }
+
         public void WriteLambda<T>(Expression<T> expression)
         {
             this.Visitor.Visit(expression);

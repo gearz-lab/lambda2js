@@ -79,13 +79,7 @@ namespace Lambda2Js
             if (value is string || value is char)
             {
                 this.result.Append('"');
-                this.result.Append(value.ToString()
-                    .Replace("\\", "\\\\")
-                    .Replace("\r", "\\r")
-                    .Replace("\n", "\\n")
-                    .Replace("\t", "\\t")
-                    .Replace("\0", "\\0")
-                    .Replace("\"", "\\\""));
+                this.WriteLiteralStringContent(value);
                 this.result.Append('"');
             }
             else if (TypeHelpers.IsNumericType(value.GetType()))
@@ -96,6 +90,18 @@ namespace Lambda2Js
                     this.result.AppendFormat("{0:E}", value);
             }
             return this;
+        }
+
+        public void WriteLiteralStringContent(object value)
+        {
+            this.result.Append(
+                value.ToString()
+                    .Replace("\\", "\\\\")
+                    .Replace("\r", "\\r")
+                    .Replace("\n", "\\n")
+                    .Replace("\t", "\\t")
+                    .Replace("\0", "\\0")
+                    .Replace("\"", "\\\""));
         }
 
         /// <summary>
