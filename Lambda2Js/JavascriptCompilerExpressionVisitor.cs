@@ -53,14 +53,16 @@ namespace Lambda2Js
 
         public override Expression Visit(Expression node)
         {
-            var context = new JavascriptConversionContext(node, this, this.result, this.Options);
+            var node2 = PreprocessNode(node);
+
+            var context = new JavascriptConversionContext(node2, this, this.result, this.Options);
             foreach (var each in this.extensions)
             {
                 each.ConvertToJavascript(context);
 
                 #region Supported will be removed in v2
 #if V1
-                if (context.gotWriter && context.Node != node)
+                if (context.gotWriter && context.Node != node2)
                     throw new Exception(
                         "Cannot both write and return a new node. Either write javascript code, or return a new node.");
 #endif
@@ -68,12 +70,12 @@ namespace Lambda2Js
                 if (context.preventDefault || context.gotWriter)
                 {
                     // canceling any further action with the current node
-                    return node;
+                    return node2;
                 }
 
                 #region Supported will be removed in v2
 #if V1
-                if (context.Node != node)
+                if (context.Node != node2)
                 {
                     // a new node must be completelly revisited
                     return this.Visit(context.Node);
@@ -83,7 +85,46 @@ namespace Lambda2Js
             }
 
             // nothing happened, continue to the default conversion behavior
-            return base.Visit(node);
+            return base.Visit(node2);
+        }
+
+        private Expression PreprocessNode(Expression node)
+        {
+            if (node.NodeType == ExpressionType.Equal
+                || node.NodeType == ExpressionType.Or
+                || node.NodeType == ExpressionType.And
+                || node.NodeType == ExpressionType.ExclusiveOr
+                || node.NodeType == ExpressionType.OrAssign
+                || node.NodeType == ExpressionType.AndAssign
+                || node.NodeType == ExpressionType.ExclusiveOrAssign)
+            {
+                var binary = (BinaryExpression)node;
+                var left = binary.Left as UnaryExpression;
+                var leftVal = left != null && (left.NodeType == ExpressionType.Convert || left.NodeType == ExpressionType.ConvertChecked) ? left.Operand : binary.Left;
+                var right = binary.Right as UnaryExpression;
+                var rightVal = right != null && (right.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.ConvertChecked) ? right.Operand : binary.Right;
+                if (rightVal.Type != leftVal.Type)
+                {
+                    if (leftVal.Type.IsEnum && TypeHelpers.IsNumericType(rightVal.Type) && rightVal.NodeType == ExpressionType.Constant)
+                    {
+                        rightVal = Expression.Convert(
+                            Expression.Constant(Enum.ToObject(leftVal.Type, ((ConstantExpression)rightVal).Value)),
+                            rightVal.Type);
+                        leftVal = binary.Left;
+                    }
+                    else if (rightVal.Type.IsEnum && TypeHelpers.IsNumericType(leftVal.Type) && leftVal.NodeType == ExpressionType.Constant)
+                    {
+                        leftVal = Expression.Convert(
+                            Expression.Constant(Enum.ToObject(rightVal.Type, ((ConstantExpression)leftVal).Value)),
+                            leftVal.Type);
+                        rightVal = binary.Right;
+                    }
+
+                    return Expression.MakeBinary(node.NodeType, leftVal, rightVal);
+                }
+            }
+
+            return node;
         }
 
         protected override Expression VisitBinary(BinaryExpression node)
