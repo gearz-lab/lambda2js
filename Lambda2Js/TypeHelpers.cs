@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
@@ -53,13 +54,13 @@ namespace Lambda2Js
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            if (typeof(IDictionary).IsAssignableFrom(type))
+            if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                 return true;
 
-            if (type.IsGenericType)
+            if (type.GetTypeInfo().IsGenericType)
             {
                 var generic = type.GetGenericTypeDefinition();
-                if (typeof(IDictionary<,>).IsAssignableFrom(generic))
+                if (typeof(IDictionary<,>).GetTypeInfo().IsAssignableFrom(generic.GetTypeInfo()))
                     return true;
             }
 
@@ -71,13 +72,13 @@ namespace Lambda2Js
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            if (typeof(ICollection).IsAssignableFrom(type))
+            if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                 return true;
 
-            if (type.IsGenericType)
+            if (type.GetTypeInfo().IsGenericType)
             {
                 var generic = type.GetGenericTypeDefinition();
-                if (typeof(ICollection<>).IsAssignableFrom(generic))
+                if (typeof(ICollection<>).GetTypeInfo().IsAssignableFrom(generic.GetTypeInfo()))
                     return true;
             }
 
@@ -89,13 +90,13 @@ namespace Lambda2Js
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            if (typeof(IEnumerable).IsAssignableFrom(type))
+            if (typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                 return true;
 
-            if (type.IsGenericType)
+            if (type.GetTypeInfo().IsGenericType)
             {
                 var generic = type.GetGenericTypeDefinition();
-                if (typeof(IEnumerable<>).IsAssignableFrom(generic))
+                if (typeof(IEnumerable<>).GetTypeInfo().IsAssignableFrom(generic.GetTypeInfo()))
                     return true;
             }
 
@@ -108,7 +109,7 @@ namespace Lambda2Js
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            var attr = type.GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefault();
+            var attr = type.GetTypeInfo().GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefault();
             return attr != null && predicate(attr);
         }
 

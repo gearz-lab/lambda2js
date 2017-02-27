@@ -87,14 +87,14 @@ namespace Lambda2Js
                 var rightVal = right != null && (right.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.ConvertChecked) ? right.Operand : binary.Right;
                 if (rightVal.Type != leftVal.Type)
                 {
-                    if (leftVal.Type.IsEnum && TypeHelpers.IsNumericType(rightVal.Type) && rightVal.NodeType == ExpressionType.Constant)
+                    if (leftVal.Type.GetTypeInfo().IsEnum && TypeHelpers.IsNumericType(rightVal.Type) && rightVal.NodeType == ExpressionType.Constant)
                     {
                         rightVal = Expression.Convert(
                             Expression.Constant(Enum.ToObject(leftVal.Type, ((ConstantExpression)rightVal).Value)),
                             rightVal.Type);
                         leftVal = binary.Left;
                     }
-                    else if (rightVal.Type.IsEnum && TypeHelpers.IsNumericType(leftVal.Type) && leftVal.NodeType == ExpressionType.Constant)
+                    else if (rightVal.Type.GetTypeInfo().IsEnum && TypeHelpers.IsNumericType(leftVal.Type) && leftVal.NodeType == ExpressionType.Constant)
                     {
                         leftVal = Expression.Convert(
                             Expression.Constant(Enum.ToObject(rightVal.Type, ((ConstantExpression)leftVal).Value)),
@@ -165,7 +165,7 @@ namespace Lambda2Js
             {
                 this.result.Write("null");
             }
-            else if (node.Type.IsEnum)
+            else if (node.Type.GetTypeInfo().IsEnum)
             {
                 using (this.result.Operation(JavascriptOperationTypes.Literal))
                 {
@@ -213,11 +213,6 @@ namespace Lambda2Js
         }
 
         protected override Expression VisitDefault(DefaultExpression node)
-        {
-            return node;
-        }
-
-        protected override Expression VisitDynamic(DynamicExpression node)
         {
             return node;
         }
@@ -795,7 +790,7 @@ namespace Lambda2Js
             if (node.Method.Name == "ToString" && node.Type == typeof(string) && node.Object != null)
             {
                 string methodName = null;
-                if (node.Arguments.Count == 0 || typeof(IFormatProvider).IsAssignableFrom(node.Arguments[0].Type))
+                if (node.Arguments.Count == 0 || typeof(IFormatProvider).GetTypeInfo().IsAssignableFrom(node.Arguments[0].Type.GetTypeInfo()))
                 {
                     methodName = "toString()";
                 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Lambda2Js
 {
@@ -17,7 +18,7 @@ namespace Lambda2Js
         public override void ConvertToJavascript(JavascriptConversionContext context)
         {
             var cte = context.Node as ConstantExpression;
-            if (cte != null && cte.Type.IsEnum)
+            if (cte != null && cte.Type.GetTypeInfo().IsEnum)
             {
                 context.PreventDefault();
                 var writer = context.GetWriter();
@@ -25,7 +26,7 @@ namespace Lambda2Js
                 var flagsAsString = (this.opts & EnumOptions.FlagsAsStringWithSeparator) != 0;
                 var flagsAsOrs = (this.opts & EnumOptions.FlagsAsNumericOrs) != 0;
                 var flagsAsArray = (this.opts & EnumOptions.FlagsAsArray) != 0;
-                var isFlags = cte.Type.IsDefined(typeof(FlagsAttribute), false);
+                var isFlags = cte.Type.GetTypeInfo().IsDefined(typeof(FlagsAttribute), false);
 
                 // when value is zero
                 if (remaining == 0 && (!isFlags || !(flagsAsString || flagsAsOrs || flagsAsArray)))

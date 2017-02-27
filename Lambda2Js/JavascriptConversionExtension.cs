@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Lambda2Js
 {
@@ -22,7 +23,7 @@ namespace Lambda2Js
         protected static Type GetTypeOfExpression(Expression expression)
         {
             if (expression.NodeType == ExpressionType.Convert || expression.NodeType == ExpressionType.ConvertChecked)
-                if (expression.Type.IsAssignableFrom(((UnaryExpression)expression).Operand.Type))
+                if (expression.Type.GetTypeInfo().IsAssignableFrom(((UnaryExpression)expression).Operand.Type.GetTypeInfo()))
                     return GetTypeOfExpression(((UnaryExpression)expression).Operand);
             return expression.Type;
         }
