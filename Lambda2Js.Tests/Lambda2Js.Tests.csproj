@@ -61,6 +61,7 @@
     <Compile Include="StaticStringMethodTests.cs" />
     <Compile Include="GeneralTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UsingCustomMethods.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lambda2Js\Lambda2Js.csproj">

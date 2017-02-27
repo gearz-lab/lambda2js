@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Lambda2Js.Properties;
 
 #pragma warning disable 1591
 namespace Lambda2Js
@@ -834,31 +835,58 @@ namespace Lambda2Js
                     }
             }
 
-            if (!node.Method.IsStatic)
-                throw new NotSupportedException(string.Format("By default, Lambda2Js cannot convert custom instance methods, only static ones. `{0}` is not static.", node.Method.Name));
 
             using (this.result.Operation(JavascriptOperationTypes.Call))
-                if (node.Method.DeclaringType != null)
+            {
+                JavascriptMethodNameAttribute methodNameAttribute = null;
+                if (node.Method.IsStatic && node.Method.DeclaringType != null)
                 {
                     this.result.Write(node.Method.DeclaringType.FullName);
                     this.result.Write('.');
                     this.result.Write(node.Method.Name);
-                    this.result.Write('(');
+                }
+                else
+                {
+                    var nameAttribute = node.Method.GetCustomAttributes(typeof(JavascriptMethodNameAttribute)).OfType<JavascriptMethodNameAttribute>().ToArray();
+                    if(nameAttribute == null || nameAttribute.Length == 0)
+                        throw new NotSupportedException(string.Format("By default, Lambda2Js cannot convert all instance methods, only static ones. `{0}` is not static and it doesn't have a [JavascriptMethodName] atttribute.", node.Method.Name));
 
-                    var posStart = this.result.Length;
-                    using (this.result.Operation(0))
-                        foreach (var arg in node.Arguments)
+                    Visit(node.Object);
+                    this.result.Write(".");
+                    methodNameAttribute = nameAttribute[0];
+                    this.result.Write(methodNameAttribute.Name);
+                }
+
+                this.result.Write('(');
+
+                var posStart = this.result.Length;
+                using (this.result.Operation(0))
+                {
+                    int index;
+                    for (index = 0; index < node.Arguments.Count; index++)
+                    {
+                        var arg = node.Arguments[index];
+                        if (this.result.Length != posStart)
+                            this.result.Write(',');
+
+                        this.Visit(arg);
+                    }
+                    if (methodNameAttribute != null && methodNameAttribute.PositionalArguments != null)
+                    {
+                        for (; index < methodNameAttribute.PositionalArguments.Length; index++)
                         {
                             if (this.result.Length != posStart)
                                 this.result.Write(',');
 
-                            this.Visit(arg);
+                            this.Visit(Expression.Constant(methodNameAttribute.PositionalArguments[index]));
                         }
-
-                    this.result.Write(')');
-
-                    return node;
+                    }
                 }
+
+                this.result.Write(')');
+
+                return node;
+            }
 
             return node;
         }
