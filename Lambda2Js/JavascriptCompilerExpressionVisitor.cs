@@ -147,6 +147,11 @@ namespace Lambda2Js
 
         protected override Expression VisitConditional(ConditionalExpression node)
         {
+            this.Visit(node.Test);
+            this.result.Write('?');
+            this.Visit(node.IfTrue);
+            this.result.Write(':');
+            this.Visit(node.IfFalse);
             return node;
         }
 
