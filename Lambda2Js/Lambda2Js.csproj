@@ -55,7 +55,6 @@
     <Compile Include="Plugins\EnumConversionExtension.cs" />
     <Compile Include="Plugins\EnumOptions.cs" />
     <Compile Include="Plugins\MemberInitAsJson.cs" />
-    <Compile Include="Properties\JavascriptMethodNameAttribute.cs" />
     <Compile Include="PropertyInfoExtensions.cs" />
     <Compile Include="ScriptVersion.cs" />
     <Compile Include="LambdaExpressionExtensions.cs" />
