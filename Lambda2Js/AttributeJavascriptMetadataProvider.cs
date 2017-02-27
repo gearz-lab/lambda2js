@@ -12,6 +12,8 @@ namespace Lambda2Js
     /// </summary>
     public class AttributeJavascriptMetadataProvider : JavascriptMetadataProvider
     {
+        private readonly object locker = new object();
+
         private IJavascriptMemberMetadata GetMemberMetadataNoCache([NotNull] MemberInfo memberInfo)
         {
             if (memberInfo == null)
@@ -49,18 +51,26 @@ namespace Lambda2Js
             if (cache.TryGetValue(memberInfo, out value))
                 return value;
 
-            lock (this)
+            lock (this.locker)
             {
                 if (cache.TryGetValue(memberInfo, out value))
                     return value;
 
                 var meta = GetMemberMetadataNoCache(memberInfo);
-                // have to create a new instance here, because readers don't have any
-                // syncronization with writers.
+
+                // This memory barrier is needed if this class is ever used in
+                // a weaker memory model implementation, allowed by the CLR
+                // specification.
+                Interlocked.MemoryBarrier();
+
+                // Have to create a new instance here, because readers don't have any
+                // syncronization with writers. I.e. when executing the line
+                // `cache.TryGetValue` outside of the lock (above), if the same
+                // instance was added to, then that method could get the wrong result.
                 cache = new Dictionary<MemberInfo, IJavascriptMemberMetadata>(cache)
-                    {
-                        [memberInfo] = meta
-                    };
+                {
+                    [memberInfo] = meta
+                };
                 return meta;
             }
         }
@@ -128,9 +138,9 @@ namespace Lambda2Js
                 // have to create a new instance here, because readers don't have any
                 // syncronization with writers.
                 accessors = new Dictionary<Type, Accessors>(accessors)
-                    {
-                        [type]=accessor
-                    };
+                {
+                    [type] = accessor
+                };
                 return accessor;
             }
         }
