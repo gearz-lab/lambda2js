@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace Lambda2Js
@@ -330,7 +331,7 @@ namespace Lambda2Js
                 case ExpressionType.NewArrayInit:
                     break;
                 case ExpressionType.Not:
-                    if (TypeHelpers.IsNumericType(type) || type.IsEnum)
+                    if (TypeHelpers.IsNumericType(type) || type.GetTypeInfo().IsEnum)
                         result.Append("~");
                     else
                         result.Append("!");
