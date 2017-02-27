@@ -48,8 +48,16 @@ namespace Lambda2Js
             if (current == JavascriptOperationTypes.Call && parent == JavascriptOperationTypes.IndexerProperty)
                 return true;
 
-            if (current == JavascriptOperationTypes.TernaryCondition)
-                return JavascriptOperationTypes.TernaryCondition > parent;
+            if (current == JavascriptOperationTypes.TernaryOp)
+                return JavascriptOperationTypes.TernaryOp > parent;
+
+            if (current == JavascriptOperationTypes.TernaryTest
+                || current == JavascriptOperationTypes.TernaryTrueValue
+                || current == JavascriptOperationTypes.TernaryFalseValue)
+                return true;
+
+            if (current == JavascriptOperationTypes.TernaryOp && parent == JavascriptOperationTypes.TernaryTrueValue)
+                return false;
 
             if (current == JavascriptOperationTypes.AddSubtract && parent == JavascriptOperationTypes.Concat)
                 return false;
@@ -133,7 +141,7 @@ namespace Lambda2Js
                     return JavascriptOperationTypes.NegComplPlus;
 
                 case ExpressionType.Conditional:
-                    return JavascriptOperationTypes.TernaryCondition;
+                    return JavascriptOperationTypes.TernaryOp;
 
                 case ExpressionType.LeftShift:
                 case ExpressionType.RightShift:

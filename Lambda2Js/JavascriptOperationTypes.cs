@@ -54,7 +54,22 @@ namespace Lambda2Js
         /// Ternary condition.
         /// <para>op ? true : false</para>
         /// </summary>
-        TernaryCondition,
+        TernaryTest,
+        /// <summary>
+        /// Ternary condition.
+        /// <para>cond ? true : op</para>
+        /// </summary>
+        TernaryFalseValue,
+        /// <summary>
+        /// Ternary operator.
+        /// <para>op => cond ? true : false</para>
+        /// </summary>
+        TernaryOp,
+        /// <summary>
+        /// Ternary condition.
+        /// <para>cond ? op : false</para>
+        /// </summary>
+        TernaryTrueValue,
 
         /// <summary>
         /// Or and logic Or.

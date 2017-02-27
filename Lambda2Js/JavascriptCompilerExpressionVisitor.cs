@@ -146,12 +146,23 @@ namespace Lambda2Js
 
         protected override Expression VisitConditional(ConditionalExpression node)
         {
-            this.Visit(node.Test);
-            this.result.Write('?');
-            this.Visit(node.IfTrue);
-            this.result.Write(':');
-            this.Visit(node.IfFalse);
-            return node;
+            using (this.result.Operation(JavascriptOperationTypes.TernaryOp))
+            {
+                using (this.result.Operation(JavascriptOperationTypes.TernaryTest))
+                    this.Visit(node.Test);
+
+                this.result.Write('?');
+
+                using (this.result.Operation(JavascriptOperationTypes.TernaryTrueValue))
+                    this.Visit(node.IfTrue);
+
+                this.result.Write(':');
+
+                using (this.result.Operation(JavascriptOperationTypes.TernaryFalseValue))
+                    this.Visit(node.IfFalse);
+
+                return node;
+            }
         }
 
         protected override Expression VisitConstant(ConstantExpression node)

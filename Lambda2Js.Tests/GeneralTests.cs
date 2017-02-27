@@ -503,12 +503,69 @@ namespace Lambda2Js.Tests
         }
 
         [TestMethod]
-        public void ConditionalCheck()
+        public void ConditionalCheck1()
         {
-          Expression<Func<MyClass, string>> expr = o => o.Phones.Length > 0 && o.Age < 50 ? o.Name + " " + o.Phones.Length + " has phones and is " + o.Age + "yo" : "ignore";
-          var js = expr.CompileToJavascript();
-          Assert.AreEqual(@"Phones.length>0&&Age<50?Name+"" ""+Phones.length+"" has phones and is ""+Age+""yo"":""ignore""",js);
+            Expression<Func<MyClass, string>> expr = o => o.Phones.Length > 0 && o.Age < 50 ? o.Name + " " + o.Phones.Length + " has phones and is " + o.Age + "yo" : "ignore";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Phones.length>0&&Age<50?Name+"" ""+Phones.length+"" has phones and is ""+Age+""yo"":""ignore""", js);
+        }
 
+        [TestMethod]
+        public void ConditionalCheck2()
+        {
+            Expression<Func<MyClass, string>> expr = o => o.Phones.Length > 0 ? (o.Age < 50 ? "a" : "b") : "c";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Phones.length>0?(Age<50?""a"":""b""):""c""", js);
+        }
+
+        [TestMethod]
+        public void ConditionalCheck3()
+        {
+            Expression<Func<MyClass, int>> expr = o => o.Phones.Length > 0 ? 1 : (o.Age < 50 ? 2 : 3);
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Phones.length>0?1:Age<50?2:3", js);
+        }
+
+        [TestMethod]
+        public void ConditionalCheck4()
+        {
+            Expression<Func<MyClass, string>> expr = o => o.Phones.Length > 0 ? "a" : (o.Age < 50 ? "b" : "c");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Phones.length>0?""a"":Age<50?""b"":""c""", js);
+        }
+
+        [TestMethod]
+        public void ConditionalCheck5()
+        {
+            Expression<Func<MyClass, int>> expr = o => (o.Phones.Length > 0 ? 1 : 2) + 10;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"(Phones.length>0?1:2)+10", js);
+        }
+
+        [TestMethod]
+        public void ConditionalCheck6()
+        {
+            Expression<Func<MyClass, string>> expr = o => (o.Phones.Length > 0 ? 1 : 2).ToString();
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"(Phones.length>0?1:2).toString()", js);
+        }
+
+        [TestMethod]
+        public void ConditionalCheck7()
+        {
+            Expression<Func<MyClass, int>> expr = o => (o.Phones.Length == 0 ? 1 : (o.Phones.Length == 1 ? 2 : 3)) * 5;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"(Phones.length===0?1:Phones.length===1?2:3)*5", js);
+        }
+
+        [TestMethod]
+        public void ConditionalCheck8()
+        {
+            var x = 10;
+            Expression<Func<MyClass, int>> expr = o => o.Phones.Length == 0 ? 1 + x : 2 + x;
+            var js = expr.CompileToJavascript();
+            // TODO: this case could be optimized
+            Assert.AreEqual(@"Phones.length===0?1+10:2+10", js);
         }
     }
 
