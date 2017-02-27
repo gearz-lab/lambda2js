@@ -40,24 +40,29 @@ namespace Lambda2Js
             };
         }
 
-        private readonly Dictionary<MemberInfo, IJavascriptMemberMetadata> cache
+        private Dictionary<MemberInfo, IJavascriptMemberMetadata> cache
             = new Dictionary<MemberInfo, IJavascriptMemberMetadata>();
 
         private IJavascriptMemberMetadata GetMemberMetadataWithCache([NotNull] MemberInfo memberInfo)
         {
-            // ReSharper disable InconsistentlySynchronizedField
-            if (!cache.ContainsKey(memberInfo))
-                lock (cache)
-                    if (!cache.ContainsKey(memberInfo))
-                    {
-                        var meta = this.GetMemberMetadataNoCache(memberInfo);
-                        Thread.MemoryBarrier();
-                        cache[memberInfo] = meta;
-                        return meta;
-                    }
+            IJavascriptMemberMetadata value;
+            if (cache.TryGetValue(memberInfo, out value))
+                return value;
 
-            return cache[memberInfo];
-            // ReSharper restore InconsistentlySynchronizedField
+            lock (this)
+            {
+                if (cache.TryGetValue(memberInfo, out value))
+                    return value;
+
+                var meta = GetMemberMetadataNoCache(memberInfo);
+                // have to create a new instance here, because readers don't have any
+                // syncronization with writers.
+                cache = new Dictionary<MemberInfo, IJavascriptMemberMetadata>(cache)
+                    {
+                        [memberInfo] = meta
+                    };
+                return meta;
+            }
         }
 
         /// <summary>
@@ -105,26 +110,29 @@ namespace Lambda2Js
             public Func<object, string> PropertyNameGetter { get; set; }
         }
 
-        private readonly Dictionary<Type, Accessors> accessors = new Dictionary<Type, Accessors>();
+        private Dictionary<Type, Accessors> accessors = new Dictionary<Type, Accessors>();
 
         private Accessors GetAccessors(Type type)
         {
-            // ReSharper disable InconsistentlySynchronizedField
-            if (!accessors.ContainsKey(type))
-                lock (accessors)
-                    if (!accessors.ContainsKey(type))
+            Accessors value;
+            if (accessors.TryGetValue(type, out value))
+                return value;
+            lock (this)
+            {
+                if (accessors.TryGetValue(type, out value))
+                    return value;
+                var accessor = new Accessors
+                {
+                    PropertyNameGetter = type.GetTypeInfo().GetDeclaredProperty("PropertyName")?.MakeGetterDelegate<string>()
+                };
+                // have to create a new instance here, because readers don't have any
+                // syncronization with writers.
+                accessors = new Dictionary<Type, Accessors>(accessors)
                     {
-                        var accessor = new Accessors
-                        {
-                            PropertyNameGetter = type.GetProperty("PropertyName")?.MakeGetterDelegate<string>()
-                        };
-                        Thread.MemoryBarrier();
-                        accessors[type] = accessor;
-                        return accessor;
-                    }
-
-            return accessors[type];
-            // ReSharper restore InconsistentlySynchronizedField
+                        [type]=accessor
+                    };
+                return accessor;
+            }
         }
     }
 }
