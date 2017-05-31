@@ -320,6 +320,102 @@ namespace Lambda2Js.Tests
         }
 
         [TestMethod]
+        public void StringStartsWith()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.StartsWith("Test");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.startsWith(\"Test\")", js);
+        }
+
+        [TestMethod]
+        public void StringEndsWith()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.EndsWith("Test");
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.endsWith(\"Test\")", js);
+        }
+
+        [TestMethod]
+        public void StringToLower()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.ToLower() == "test";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.toLowerCase()===\"test\"", js);
+        }
+
+        [TestMethod]
+        public void StringToUpper()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.ToUpper() == "TEST";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.toUpperCase()===\"TEST\"", js);
+        }
+
+        [TestMethod]
+        public void StringTrim()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.Trim() == "test";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.trim()===\"test\"", js);
+        }
+
+        [TestMethod]
+        public void StringTrimStart()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.TrimStart() == "test";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.trimLeft()===\"test\"", js);
+        }
+
+        [TestMethod]
+        public void StringTrimEnd()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.TrimEnd() == "test";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.trimRight()===\"test\"", js);
+        }
+
+        [TestMethod]
+        public void StringSubString()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.Substring(1) == "est";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.substring(1)===\"est\"", js);
+        }
+
+        [TestMethod]
+        public void StringPadLeft()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.PadLeft(1) == "est";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.padStart(1)===\"est\"", js);
+        }
+
+        [TestMethod]
+        public void StringPadRight()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.PadRight(1) == "est";
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.padEnd(1)===\"est\"", js);
+        }
+
+        [TestMethod]
+        public void StringLastIndexOf()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.LastIndexOf("!") == 1;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.lastIndexOf(\"!\")===1", js);
+        }
+
+        [TestMethod]
+        public void StringIndexOf()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Name.IndexOf("!") == 1;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.indexOf(\"!\")===1", js);
+        }
+
+        [TestMethod]
         public void StringIndexer1()
         {
             Expression<Func<string, char>> expr = s => s[0];
