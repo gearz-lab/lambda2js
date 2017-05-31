@@ -18,7 +18,7 @@ namespace Lambda2Js
     {
         private readonly ParameterExpression contextParameter;
         private readonly IEnumerable<JavascriptConversionExtension> extensions;
-        private readonly JavascriptWriter result = new JavascriptWriter();
+        private readonly JavascriptWriter resultWriter = new JavascriptWriter();
         private List<string> usedScopeMembers;
 
         public JavascriptCompilerExpressionVisitor(
@@ -43,7 +43,7 @@ namespace Lambda2Js
         /// <summary>
         /// Gets the resulting JavaScript code.
         /// </summary>
-        public string Result => this.result.ToString();
+        public string Result => this.resultWriter.ToString();
 
         /// <summary>
         /// Gets the scope names that were used from the scope parameter.
@@ -51,10 +51,12 @@ namespace Lambda2Js
         [CanBeNull]
         public string[] UsedScopeMembers => this.usedScopeMembers?.ToArray();
 
+        public JavascriptWriter ResultWriter => this.resultWriter;
+
         public override Expression Visit(Expression node)
         {
             var node2 = PreprocessNode(node);
-            var context = new JavascriptConversionContext(node2, this, this.result, this.Options);
+            var context = new JavascriptConversionContext(node2, this, this.resultWriter, this.Options);
             foreach (var each in this.extensions)
             {
                 each.ConvertToJavascript(context);
@@ -113,21 +115,21 @@ namespace Lambda2Js
         {
             if (node.NodeType == ExpressionType.ArrayIndex)
             {
-                using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
                 {
                     this.Visit(node.Left);
-                    this.result.Write('[');
-                    using (this.result.Operation(0))
+                    this.resultWriter.Write('[');
+                    using (this.resultWriter.Operation(0))
                         this.Visit(node.Right);
-                    this.result.Write(']');
+                    this.resultWriter.Write(']');
                     return node;
                 }
             }
 
-            using (this.result.Operation(node))
+            using (this.resultWriter.Operation(node))
             {
                 this.Visit(node.Left);
-                this.result.WriteOperator(node.NodeType, node.Type);
+                this.resultWriter.WriteOperator(node.NodeType, node.Type);
                 this.Visit(node.Right);
             }
 
@@ -146,19 +148,19 @@ namespace Lambda2Js
 
         protected override Expression VisitConditional(ConditionalExpression node)
         {
-            using (this.result.Operation(JavascriptOperationTypes.TernaryOp))
+            using (this.resultWriter.Operation(JavascriptOperationTypes.TernaryOp))
             {
-                using (this.result.Operation(JavascriptOperationTypes.TernaryTest))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.TernaryTest))
                     this.Visit(node.Test);
 
-                this.result.Write('?');
+                this.resultWriter.Write('?');
 
-                using (this.result.Operation(JavascriptOperationTypes.TernaryTrueValue))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.TernaryTrueValue))
                     this.Visit(node.IfTrue);
 
-                this.result.Write(':');
+                this.resultWriter.Write(':');
 
-                using (this.result.Operation(JavascriptOperationTypes.TernaryFalseValue))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.TernaryFalseValue))
                     this.Visit(node.IfFalse);
 
                 return node;
@@ -169,33 +171,33 @@ namespace Lambda2Js
         {
             if (TypeHelpers.IsNumericType(node.Type))
             {
-                using (this.result.Operation(JavascriptOperationTypes.Literal))
-                    this.result.Write(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
+                    this.resultWriter.Write(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
             }
             else if (node.Type == typeof(string))
             {
-                using (this.result.Operation(JavascriptOperationTypes.Literal))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                     this.WriteStringLiteral((string)node.Value);
             }
             else if (node.Value == null)
             {
-                this.result.Write("null");
+                this.resultWriter.Write("null");
             }
             else if (node.Type.GetTypeInfo().IsEnum)
             {
-                using (this.result.Operation(JavascriptOperationTypes.Literal))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                 {
                     var underlyingType = Enum.GetUnderlyingType(node.Type);
-                    this.result.Write(Convert.ChangeType(node.Value, underlyingType, CultureInfo.InvariantCulture));
+                    this.resultWriter.Write(Convert.ChangeType(node.Value, underlyingType, CultureInfo.InvariantCulture));
                 }
             }
             else if (node.Type == typeof(Regex))
             {
-                using (this.result.Operation(JavascriptOperationTypes.Literal))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                 {
-                    this.result.Write('/');
-                    this.result.Write(node.Value);
-                    this.result.Write("/g");
+                    this.resultWriter.Write('/');
+                    this.resultWriter.Write(node.Value);
+                    this.resultWriter.Write("/g");
                 }
             }
             else if (node.Type.IsClosureRootType())
@@ -210,8 +212,8 @@ namespace Lambda2Js
 
         private void WriteStringLiteral(string str)
         {
-            this.result.Write('"');
-            this.result.Write(
+            this.resultWriter.Write('"');
+            this.resultWriter.Write(
                 str
                     .Replace("\\", "\\\\")
                     .Replace("\r", "\\r")
@@ -220,7 +222,7 @@ namespace Lambda2Js
                     .Replace("\0", "\\0")
                     .Replace("\"", "\\\""));
 
-            this.result.Write('"');
+            this.resultWriter.Write('"');
         }
 
         protected override Expression VisitDebugInfo(DebugInfoExpression node)
@@ -275,30 +277,30 @@ namespace Lambda2Js
             if (this.Options.ScriptVersion.Supports(JavascriptSyntax.ArrowFunction))
             {
                 // Arrow function syntax and precedence works mostly like an assignment.
-                using (this.result.Operation(JavascriptOperationTypes.AssignRhs))
+                using (this.resultWriter.Operation(JavascriptOperationTypes.AssignRhs))
                 {
                     var pars = node.Parameters;
                     if (pars.Count != 1)
-                        this.result.Write("(");
+                        this.resultWriter.Write("(");
 
-                    var posStart = this.result.Length;
+                    var posStart = this.resultWriter.Length;
                     foreach (var param in node.Parameters)
                     {
                         if (param.IsByRef)
                             throw new NotSupportedException("Cannot pass by ref in javascript.");
 
-                        if (this.result.Length > posStart)
-                            this.result.Write(',');
+                        if (this.resultWriter.Length > posStart)
+                            this.resultWriter.Write(',');
 
-                        this.result.Write(param.Name);
+                        this.resultWriter.Write(param.Name);
                     }
 
                     if (pars.Count != 1)
-                        this.result.Write(")");
+                        this.resultWriter.Write(")");
 
-                    this.result.Write("=>");
+                    this.resultWriter.Write("=>");
 
-                    using (this.result.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
                     {
                         this.Visit(node.Body);
                     }
@@ -306,36 +308,36 @@ namespace Lambda2Js
             }
             else
             {
-                using (this.result.Operation(node))
+                using (this.resultWriter.Operation(node))
                 {
-                    this.result.Write("function(");
+                    this.resultWriter.Write("function(");
 
-                    var posStart = this.result.Length;
+                    var posStart = this.resultWriter.Length;
                     foreach (var param in node.Parameters)
                     {
                         if (param.IsByRef)
                             throw new NotSupportedException("Cannot pass by ref in javascript.");
 
-                        if (this.result.Length > posStart)
-                            this.result.Write(',');
+                        if (this.resultWriter.Length > posStart)
+                            this.resultWriter.Write(',');
 
-                        this.result.Write(param.Name);
+                        this.resultWriter.Write(param.Name);
                     }
 
-                    this.result.Write("){");
+                    this.resultWriter.Write("){");
                     if (node.ReturnType != typeof(void))
-                        using (this.result.Operation(0))
+                        using (this.resultWriter.Operation(0))
                         {
-                            this.result.Write("return ");
+                            this.resultWriter.Write("return ");
                             this.Visit(node.Body);
                         }
                     else
-                        using (this.result.Operation(0))
+                        using (this.resultWriter.Operation(0))
                         {
                             this.Visit(node.Body);
                         }
 
-                    this.result.Write(";}");
+                    this.resultWriter.Write(";}");
                 }
             }
             return node;
@@ -346,15 +348,15 @@ namespace Lambda2Js
             // Detecting a new dictionary
             if (TypeHelpers.IsDictionaryType(node.Type))
             {
-                using (this.result.Operation(0))
+                using (this.resultWriter.Operation(0))
                 {
-                    this.result.Write('{');
+                    this.resultWriter.Write('{');
 
-                    var posStart = this.result.Length;
+                    var posStart = this.resultWriter.Length;
                     foreach (var init in node.Initializers)
                     {
-                        if (this.result.Length > posStart)
-                            this.result.Write(',');
+                        if (this.resultWriter.Length > posStart)
+                            this.resultWriter.Write(',');
 
                         if (init.Arguments.Count != 2)
                             throw new NotSupportedException(
@@ -366,15 +368,15 @@ namespace Lambda2Js
 
                         var name = (string)((ConstantExpression)nameArg).Value;
                         if (Regex.IsMatch(name, @"^\w[\d\w]*$"))
-                            this.result.Write(name);
+                            this.resultWriter.Write(name);
                         else
                             this.WriteStringLiteral(name);
 
-                        this.result.Write(':');
+                        this.resultWriter.Write(':');
                         this.Visit(init.Arguments[1]);
                     }
 
-                    this.result.Write('}');
+                    this.resultWriter.Write('}');
                 }
 
                 return node;
@@ -383,15 +385,15 @@ namespace Lambda2Js
             // Detecting a new dictionary
             if (TypeHelpers.IsListType(node.Type))
             {
-                using (this.result.Operation(0))
+                using (this.resultWriter.Operation(0))
                 {
-                    this.result.Write('[');
+                    this.resultWriter.Write('[');
 
-                    var posStart = this.result.Length;
+                    var posStart = this.resultWriter.Length;
                     foreach (var init in node.Initializers)
                     {
-                        if (this.result.Length > posStart)
-                            this.result.Write(',');
+                        if (this.resultWriter.Length > posStart)
+                            this.resultWriter.Write(',');
 
                         if (init.Arguments.Count != 1)
                             throw new Exception(
@@ -400,7 +402,7 @@ namespace Lambda2Js
                         this.Visit(init.Arguments[0]);
                     }
 
-                    this.result.Write(']');
+                    this.resultWriter.Write(']');
                 }
 
                 return node;
@@ -423,27 +425,27 @@ namespace Lambda2Js
                 {
                     if (node.Member.Name == "Empty")
                     {
-                        using (this.result.Operation(JavascriptOperationTypes.Literal))
-                            this.result.Write("\"\"");
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
+                            this.resultWriter.Write("\"\"");
                         return node;
                     }
                 }
             }
 
             bool isClosure = false;
-            using (this.result.Operation(node))
+            using (this.resultWriter.Operation(node))
             {
                 var metadataProvider = this.Options.GetMetadataProvider();
-                var pos = this.result.Length;
+                var pos = this.resultWriter.Length;
                 if (node.Expression == null)
                 {
                     var decl = node.Member.DeclaringType;
                     if (decl != null)
                     {
                         // TODO: there should be a way to customize the name of types through metadata
-                        this.result.Write(decl.FullName);
-                        this.result.Write('.');
-                        this.result.Write(decl.Name);
+                        this.resultWriter.Write(decl.FullName);
+                        this.resultWriter.Write('.');
+                        this.resultWriter.Write(decl.Name);
                     }
                 }
                 else if (node.Expression.Type.IsClosureRootType())
@@ -460,8 +462,8 @@ namespace Lambda2Js
                     this.usedScopeMembers.Add(meta?.MemberName ?? node.Member.Name);
                 }
 
-                if (this.result.Length > pos)
-                    this.result.Write('.');
+                if (this.resultWriter.Length > pos)
+                    this.resultWriter.Write('.');
 
                 if (!isClosure)
                 {
@@ -471,13 +473,13 @@ namespace Lambda2Js
                         && node.Member.Name == "Count"
                         && TypeHelpers.IsListType(propInfo.DeclaringType))
                     {
-                        this.result.Write("length");
+                        this.resultWriter.Write("length");
                     }
                     else
                     {
                         var meta = metadataProvider.GetMemberMetadata(node.Member);
                         Debug.Assert(!string.IsNullOrEmpty(meta?.MemberName), "!string.IsNullOrEmpty(meta?.MemberName)");
-                        this.result.Write(meta?.MemberName);
+                        this.resultWriter.Write(meta?.MemberName);
                     }
                 }
             }
@@ -499,15 +501,15 @@ namespace Lambda2Js
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            using (this.result.Operation(node))
+            using (this.resultWriter.Operation(node))
             {
                 var isPostOp = JsOperationHelper.IsPostfixOperator(node.NodeType);
 
                 if (!isPostOp)
-                    this.result.WriteOperator(node.NodeType, node.Type);
+                    this.resultWriter.WriteOperator(node.NodeType, node.Type);
                 this.Visit(node.Operand);
                 if (isPostOp)
-                    this.result.WriteOperator(node.NodeType, node.Type);
+                    this.resultWriter.WriteOperator(node.NodeType, node.Type);
 
                 return node;
             }
@@ -540,26 +542,26 @@ namespace Lambda2Js
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            this.result.Write(node.Name);
+            this.resultWriter.Write(node.Name);
             return node;
         }
 
         protected override Expression VisitNewArray(NewArrayExpression node)
         {
-            using (this.result.Operation(0))
+            using (this.resultWriter.Operation(0))
             {
-                this.result.Write('[');
+                this.resultWriter.Write('[');
 
-                var posStart = this.result.Length;
+                var posStart = this.resultWriter.Length;
                 foreach (var item in node.Expressions)
                 {
-                    if (this.result.Length > posStart)
-                        this.result.Write(',');
+                    if (this.resultWriter.Length > posStart)
+                        this.resultWriter.Write(',');
 
                     this.Visit(item);
                 }
 
-                this.result.Write(']');
+                this.resultWriter.Write(']');
             }
 
             return node;
@@ -571,52 +573,52 @@ namespace Lambda2Js
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (node.Members != null && node.Members.Count > 0)
             {
-                using (this.result.Operation(0))
+                using (this.resultWriter.Operation(0))
                 {
-                    this.result.Write('{');
+                    this.resultWriter.Write('{');
 
-                    var posStart = this.result.Length;
+                    var posStart = this.resultWriter.Length;
                     for (int itMember = 0; itMember < node.Members.Count; itMember++)
                     {
                         var member = node.Members[itMember];
-                        if (this.result.Length > posStart)
-                            this.result.Write(',');
+                        if (this.resultWriter.Length > posStart)
+                            this.resultWriter.Write(',');
 
                         if (Regex.IsMatch(member.Name, @"^\w[\d\w]*$"))
-                            this.result.Write(member.Name);
+                            this.resultWriter.Write(member.Name);
                         else
                             this.WriteStringLiteral(member.Name);
 
-                        this.result.Write(':');
+                        this.resultWriter.Write(':');
                         this.Visit(node.Arguments[itMember]);
                     }
 
-                    this.result.Write('}');
+                    this.resultWriter.Write('}');
                 }
             }
             else if (node.Type != typeof(Regex))
             {
-                using (this.result.Operation(0))
+                using (this.resultWriter.Operation(0))
                 {
-                    this.result.Write("new");
-                    this.result.Write(' ');
-                    using (this.result.Operation(JavascriptOperationTypes.Call))
+                    this.resultWriter.Write("new");
+                    this.resultWriter.Write(' ');
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                     {
-                        using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.result.Write(node.Type.FullName.Replace('+', '.'));
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                            this.resultWriter.Write(node.Type.FullName.Replace('+', '.'));
 
-                        this.result.Write('(');
+                        this.resultWriter.Write('(');
 
-                        var posStart = this.result.Length;
+                        var posStart = this.resultWriter.Length;
                         foreach (var argExpr in node.Arguments)
                         {
-                            if (this.result.Length > posStart)
-                                this.result.Write(',');
+                            if (this.resultWriter.Length > posStart)
+                                this.resultWriter.Write(',');
 
                             this.Visit(argExpr);
                         }
 
-                        this.result.Write(')');
+                        this.resultWriter.Write(')');
                     }
                 }
             }
@@ -628,23 +630,23 @@ namespace Lambda2Js
                 // if all parameters are constant
                 if (node.Arguments.All(a => a.NodeType == ExpressionType.Constant))
                 {
-                    this.result.Write('/');
+                    this.resultWriter.Write('/');
 
                     var pattern = (string)((ConstantExpression)node.Arguments[0]).Value;
-                    this.result.Write(pattern);
+                    this.resultWriter.Write(pattern);
                     var args = node.Arguments.Count;
 
-                    this.result.Write('/');
-                    this.result.Write('g');
+                    this.resultWriter.Write('/');
+                    this.resultWriter.Write('g');
                     RegexOptions options = 0;
                     if (args == 2)
                     {
                         options = (RegexOptions)((ConstantExpression)node.Arguments[1]).Value;
 
                         if ((options & RegexOptions.IgnoreCase) != 0)
-                            this.result.Write('i');
+                            this.resultWriter.Write('i');
                         if ((options & RegexOptions.Multiline) != 0)
-                            this.result.Write('m');
+                            this.resultWriter.Write('m');
                     }
 
                     // creating a Regex object with `ECMAScript` to make sure the pattern is valid in JavaScript.
@@ -654,18 +656,18 @@ namespace Lambda2Js
                 }
                 else
                 {
-                    using (this.result.Operation(JavascriptOperationTypes.New))
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.New))
                     {
-                        this.result.Write("new RegExp(");
+                        this.resultWriter.Write("new RegExp(");
 
-                        using (this.result.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.ParamIsolatedLhs))
                             this.Visit(node.Arguments[0]);
 
                         var args = node.Arguments.Count;
 
                         if (args == 2)
                         {
-                            this.result.Write(',');
+                            this.resultWriter.Write(',');
 
                             var optsConst = node.Arguments[1] as ConstantExpression;
                             if (optsConst == null)
@@ -673,16 +675,16 @@ namespace Lambda2Js
 
                             var options = (RegexOptions)optsConst.Value;
 
-                            this.result.Write('\'');
-                            this.result.Write('g');
+                            this.resultWriter.Write('\'');
+                            this.resultWriter.Write('g');
                             if ((options & RegexOptions.IgnoreCase) != 0)
-                                this.result.Write('i');
+                                this.resultWriter.Write('i');
                             if ((options & RegexOptions.Multiline) != 0)
-                                this.result.Write('m');
-                            this.result.Write('\'');
+                                this.resultWriter.Write('m');
+                            this.resultWriter.Write('\'');
                         }
 
-                        this.result.Write(')');
+                        this.resultWriter.Write(')');
                     }
                 }
             }
@@ -697,56 +699,56 @@ namespace Lambda2Js
                 var isIndexer = node.Method.Name == "get_Item" || node.Method.Name == "get_Chars";
                 if (isIndexer)
                 {
-                    using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
                     {
                         this.Visit(node.Object);
-                        this.result.Write('[');
+                        this.resultWriter.Write('[');
 
-                        using (this.result.Operation(0))
+                        using (this.resultWriter.Operation(0))
                         {
-                            var posStart0 = this.result.Length;
+                            var posStart0 = this.resultWriter.Length;
                             foreach (var arg in node.Arguments)
                             {
-                                if (this.result.Length != posStart0)
-                                    this.result.Write(',');
+                                if (this.resultWriter.Length != posStart0)
+                                    this.resultWriter.Write(',');
 
                                 this.Visit(arg);
                             }
                         }
 
-                        this.result.Write(']');
+                        this.resultWriter.Write(']');
                         return node;
                     }
                 }
 
                 if (node.Method.Name == "set_Item")
                 {
-                    using (this.result.Operation(0))
+                    using (this.resultWriter.Operation(0))
                     {
-                        using (this.result.Operation(JavascriptOperationTypes.AssignRhs))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.AssignRhs))
                         {
-                            using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
                             {
                                 this.Visit(node.Object);
-                                this.result.Write('[');
+                                this.resultWriter.Write('[');
 
-                                using (this.result.Operation(0))
+                                using (this.resultWriter.Operation(0))
                                 {
-                                    var posStart0 = this.result.Length;
+                                    var posStart0 = this.resultWriter.Length;
                                     foreach (var arg in node.Arguments)
                                     {
-                                        if (this.result.Length != posStart0)
-                                            this.result.Write(',');
+                                        if (this.resultWriter.Length != posStart0)
+                                            this.resultWriter.Write(',');
 
                                         this.Visit(arg);
                                     }
                                 }
 
-                                this.result.Write(']');
+                                this.resultWriter.Write(']');
                             }
                         }
 
-                        this.result.Write('=');
+                        this.resultWriter.Write('=');
                         this.Visit(node.Arguments.Single());
                     }
 
@@ -759,14 +761,14 @@ namespace Lambda2Js
                     && (node.Method.Name == "ContainsKey"
                         && TypeHelpers.IsDictionaryType(node.Method.DeclaringType)))
                 {
-                    using (this.result.Operation(JavascriptOperationTypes.Call))
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                     {
-                        using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
                             this.Visit(node.Object);
-                        this.result.Write(".hasOwnProperty(");
-                        using (this.result.Operation(0))
+                        this.resultWriter.Write(".hasOwnProperty(");
+                        using (this.resultWriter.Operation(0))
                             this.Visit(node.Arguments.Single());
-                        this.result.Write(')');
+                        this.resultWriter.Write(')');
                         return node;
                     }
                 }
@@ -776,28 +778,28 @@ namespace Lambda2Js
             {
                 if (node.Method.Name == "Contains")
                 {
-                    using (this.result.Operation(JavascriptOperationTypes.Comparison))
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.Comparison))
                     {
-                        using (this.result.Operation(JavascriptOperationTypes.Call))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
                                 this.Visit(node.Object);
-                            this.result.Write(".indexOf(");
-                            using (this.result.Operation(0))
+                            this.resultWriter.Write(".indexOf(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                var posStart = this.result.Length;
+                                var posStart = this.resultWriter.Length;
                                 foreach (var arg in node.Arguments)
                                 {
-                                    if (this.result.Length > posStart)
-                                        this.result.Write(',');
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
                                     this.Visit(arg);
                                 }
                             }
 
-                            this.result.Write(')');
+                            this.resultWriter.Write(')');
                         }
 
-                        this.result.Write(">=0");
+                        this.resultWriter.Write(">=0");
                         return node;
                     }
                 }
@@ -841,11 +843,11 @@ namespace Lambda2Js
                 }
 
                 if (methodName != null)
-                    using (this.result.Operation(JavascriptOperationTypes.Call))
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                     {
-                        using (this.result.Operation(JavascriptOperationTypes.IndexerProperty))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
                             this.Visit(node.Object);
-                        this.result.WriteFormat(".{0}", methodName);
+                        this.resultWriter.WriteFormat(".{0}", methodName);
                         return node;
                     }
             }
@@ -853,25 +855,25 @@ namespace Lambda2Js
             if (!node.Method.IsStatic)
                 throw new NotSupportedException(string.Format("By default, Lambda2Js cannot convert custom instance methods, only static ones. `{0}` is not static.", node.Method.Name));
 
-            using (this.result.Operation(JavascriptOperationTypes.Call))
+            using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                 if (node.Method.DeclaringType != null)
                 {
-                    this.result.Write(node.Method.DeclaringType.FullName);
-                    this.result.Write('.');
-                    this.result.Write(node.Method.Name);
-                    this.result.Write('(');
+                    this.resultWriter.Write(node.Method.DeclaringType.FullName);
+                    this.resultWriter.Write('.');
+                    this.resultWriter.Write(node.Method.Name);
+                    this.resultWriter.Write('(');
 
-                    var posStart = this.result.Length;
-                    using (this.result.Operation(0))
+                    var posStart = this.resultWriter.Length;
+                    using (this.resultWriter.Operation(0))
                         foreach (var arg in node.Arguments)
                         {
-                            if (this.result.Length != posStart)
-                                this.result.Write(',');
+                            if (this.resultWriter.Length != posStart)
+                                this.resultWriter.Write(',');
 
                             this.Visit(arg);
                         }
 
-                    this.result.Write(')');
+                    this.resultWriter.Write(')');
 
                     return node;
                 }
