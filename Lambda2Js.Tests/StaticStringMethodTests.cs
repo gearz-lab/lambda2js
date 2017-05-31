@@ -91,7 +91,7 @@ namespace Lambda2Js.Tests
                     JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
                     new[] { new StaticStringMethods() }));
 
-            Assert.AreEqual("(Name+\":\"+(Age+10)).indexOf(\"30\")>=0", js);
+            Assert.AreEqual("(Name+\":\"+(Age+10)).includes(\"30\")", js);
         }
 
         [TestMethod]

@@ -308,7 +308,7 @@ namespace Lambda2Js.Tests
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.Contains("Miguel");
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("Name.indexOf(\"Miguel\")>=0", js);
+            Assert.AreEqual("Name.includes(\"Miguel\")", js);
         }
 
         [TestMethod]
@@ -316,7 +316,7 @@ namespace Lambda2Js.Tests
         {
             Expression<Func<MyClass, bool>> expr = o => "Miguel Angelo Santos Bicudo".Contains(o.Name);
             var js = expr.CompileToJavascript();
-            Assert.AreEqual("(\"Miguel Angelo Santos Bicudo\").indexOf(Name)>=0", js);
+            Assert.AreEqual("(\"Miguel Angelo Santos Bicudo\").includes(Name)", js);
         }
 
         [TestMethod]

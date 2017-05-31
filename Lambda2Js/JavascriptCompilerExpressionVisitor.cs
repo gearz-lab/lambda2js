@@ -778,28 +778,23 @@ namespace Lambda2Js
             {
                 if (node.Method.Name == "Contains")
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Comparison))
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                     {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                            this.Visit(node.Object);
+                        this.resultWriter.Write(".includes(");
+                        using (this.resultWriter.Operation(0))
                         {
-                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                                this.Visit(node.Object);
-                            this.resultWriter.Write(".indexOf(");
-                            using (this.resultWriter.Operation(0))
+                            var posStart = this.resultWriter.Length;
+                            foreach (var arg in node.Arguments)
                             {
-                                var posStart = this.resultWriter.Length;
-                                foreach (var arg in node.Arguments)
-                                {
-                                    if (this.resultWriter.Length > posStart)
-                                        this.resultWriter.Write(',');
-                                    this.Visit(arg);
-                                }
+                                if (this.resultWriter.Length > posStart)
+                                    this.resultWriter.Write(',');
+                                this.Visit(arg);
                             }
-
-                            this.resultWriter.Write(')');
                         }
 
-                        this.resultWriter.Write(">=0");
+                        this.resultWriter.Write(')');
                         return node;
                     }
                 }
