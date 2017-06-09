@@ -18,6 +18,25 @@ namespace Lambda2Js
         /// what extensions to use (i.e. StaticStringMethods, StaticMathMethods, or any other custom extensions).
         /// </param>
         /// <returns>JavaScript code represented as a string.</returns>
+        public static string CompileToJavascript(
+            [NotNull] this LambdaExpression expr,
+            ScriptVersion scriptVersion,
+            params JavascriptConversionExtension[] extensions)
+        {
+            return expr.CompileToJavascript(new JavascriptCompilationOptions(scriptVersion, extensions));
+        }
+
+        /// <summary>
+        /// Compiles a lambda expression to JavaScript code.
+        /// </summary>
+        /// <param name="expr">Expression to compile to JavaScript.</param>
+        /// <param name="options">
+        /// Conversion options:
+        /// whether to include only the body of the lambda,
+        /// whether to use a single scope parameter,
+        /// what extensions to use (i.e. StaticStringMethods, StaticMathMethods, or any other custom extensions).
+        /// </param>
+        /// <returns>JavaScript code represented as a string.</returns>
         public static string CompileToJavascript([NotNull] this LambdaExpression expr, JavascriptCompilationOptions options = null)
         {
             if (expr == null)

@@ -274,7 +274,7 @@ namespace Lambda2Js
         {
             // Ecma script 6+: rendering arrow function syntax
             // Other: rendering inline annonimous function
-            if (this.Options.ScriptVersion.Supports(JavascriptSyntax.ArrowFunction))
+            if (this.Options.ScriptVersion.Supports(JavascriptSyntaxFeature.ArrowFunction))
             {
                 // Arrow function syntax and precedence works mostly like an assignment.
                 using (this.resultWriter.Operation(JavascriptOperationTypes.AssignRhs))
@@ -778,242 +778,282 @@ namespace Lambda2Js
             {
                 if (node.Method.Name == "Contains")
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_includes))
                     {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".includes(");
-                        using (this.resultWriter.Operation(0))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".includes(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
-                        }
 
-                        this.resultWriter.Write(')');
-                        return node;
+                            this.resultWriter.Write(')');
+                            return node;
+                        }
+                    }
+                    else if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_indexOf))
+                    {
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Comparison))
+                        {
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
+                            {
+                                using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                    this.Visit(node.Object);
+                                this.resultWriter.Write(".indexOf(");
+                                using (this.resultWriter.Operation(0))
+                                {
+                                    var posStart = this.resultWriter.Length;
+                                    foreach (var arg in node.Arguments)
+                                    {
+                                        if (this.resultWriter.Length > posStart)
+                                            this.resultWriter.Write(',');
+                                        this.Visit(arg);
+                                    }
+                                }
+
+                                this.resultWriter.Write(')');
+                            }
+
+                            this.resultWriter.Write(">=0");
+                            return node;
+                        }
                     }
                 }
                 else if (node.Method.Name == nameof(string.StartsWith))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".startsWith(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_startsWith))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".startsWith(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
+
+                            this.resultWriter.Write(')');
+                            return node;
+
                         }
-
-                        this.resultWriter.Write(')');
-                        return node;
-
-                    }
                 }
                 else if (node.Method.Name == nameof(string.EndsWith))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".endsWith(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_endsWith))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".endsWith(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
-                        }
 
-                        this.resultWriter.Write(')');
-                        return node;
-                    }
+                            this.resultWriter.Write(')');
+                            return node;
+                        }
                 }
                 else if (node.Method.Name == nameof(string.ToLower))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".toLowerCase(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_toLowerCase))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".toLowerCase(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.ToUpper))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".toUpperCase(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_toUpperCase))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".toUpperCase(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.Trim))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".trim(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_trim))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".trim(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.TrimEnd))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".trimRight(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_trimRight))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".trimRight(");
+                            using (this.resultWriter.Operation(0))
+                            {
+                                var posStart = this.resultWriter.Length;
+                            }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.TrimStart))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".trimLeft(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_trimLeft))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".trimLeft(");
+                            using (this.resultWriter.Operation(0))
+                            {
+                                var posStart = this.resultWriter.Length;
+                            }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.Substring))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".substring(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_substring))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".substring(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.PadLeft))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".padStart(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_padStart))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".padStart(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.PadRight))
                 {
-                    using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
-                    {
-                        using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
-                            this.Visit(node.Object);
-                        this.resultWriter.Write(".padEnd(");
-                        using (this.resultWriter.Operation(0))
+                    if (this.Options.ScriptVersion.Supports(JavascriptApiFeature.String_prototype_padEnd))
+                        using (this.resultWriter.Operation(JavascriptOperationTypes.Call))
                         {
-                            var posStart = this.resultWriter.Length;
-                            foreach (var arg in node.Arguments)
+                            using (this.resultWriter.Operation(JavascriptOperationTypes.IndexerProperty))
+                                this.Visit(node.Object);
+                            this.resultWriter.Write(".padEnd(");
+                            using (this.resultWriter.Operation(0))
                             {
-                                if (this.resultWriter.Length > posStart)
-                                    this.resultWriter.Write(',');
-                                this.Visit(arg);
+                                var posStart = this.resultWriter.Length;
+                                foreach (var arg in node.Arguments)
+                                {
+                                    if (this.resultWriter.Length > posStart)
+                                        this.resultWriter.Write(',');
+                                    this.Visit(arg);
+                                }
                             }
+
+                            this.resultWriter.Write(')');
+
+                            return node;
                         }
-
-                        this.resultWriter.Write(')');
-
-                        return node;
-                    }
                 }
                 else if (node.Method.Name == nameof(string.LastIndexOf))
                 {

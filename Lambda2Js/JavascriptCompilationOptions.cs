@@ -20,7 +20,7 @@ namespace Lambda2Js
             this.BodyOnly = true;
             this.ScopeParameter = true;
             this.Extensions = Enumerable.Empty<JavascriptConversionExtension>();
-            this.ScriptVersion = ScriptVersion.Es50;
+            this.ScriptVersion = ScriptVersion.Es51;
             this.UndefinedLiteral = "undefined";
         }
 

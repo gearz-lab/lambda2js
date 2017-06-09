@@ -308,6 +308,8 @@ namespace Lambda2Js.Tests
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.Contains("Miguel");
             var js = expr.CompileToJavascript();
+            Assert.AreEqual("Name.indexOf(\"Miguel\")>=0", js);
+            js = expr.CompileToJavascript(ScriptVersion.Es60);
             Assert.AreEqual("Name.includes(\"Miguel\")", js);
         }
 
@@ -316,6 +318,8 @@ namespace Lambda2Js.Tests
         {
             Expression<Func<MyClass, bool>> expr = o => "Miguel Angelo Santos Bicudo".Contains(o.Name);
             var js = expr.CompileToJavascript();
+            Assert.AreEqual("(\"Miguel Angelo Santos Bicudo\").indexOf(Name)>=0", js);
+            js = expr.CompileToJavascript(ScriptVersion.Es60);
             Assert.AreEqual("(\"Miguel Angelo Santos Bicudo\").includes(Name)", js);
         }
 
@@ -323,7 +327,7 @@ namespace Lambda2Js.Tests
         public void StringStartsWith()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.StartsWith("Test");
-            var js = expr.CompileToJavascript();
+            var js = expr.CompileToJavascript(ScriptVersion.Es60);
             Assert.AreEqual("Name.startsWith(\"Test\")", js);
         }
 
@@ -331,7 +335,7 @@ namespace Lambda2Js.Tests
         public void StringEndsWith()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.EndsWith("Test");
-            var js = expr.CompileToJavascript();
+            var js = expr.CompileToJavascript(ScriptVersion.Es60);
             Assert.AreEqual("Name.endsWith(\"Test\")", js);
         }
 
@@ -355,7 +359,7 @@ namespace Lambda2Js.Tests
         public void StringTrim()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.Trim() == "test";
-            var js = expr.CompileToJavascript();
+            var js = expr.CompileToJavascript(ScriptVersion.Es51);
             Assert.AreEqual("Name.trim()===\"test\"", js);
         }
 
@@ -363,7 +367,7 @@ namespace Lambda2Js.Tests
         public void StringTrimStart()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.TrimStart() == "test";
-            var js = expr.CompileToJavascript();
+            var js = expr.CompileToJavascript(ScriptVersion.Es50 | ScriptVersion.NonStandard);
             Assert.AreEqual("Name.trimLeft()===\"test\"", js);
         }
 
@@ -371,7 +375,7 @@ namespace Lambda2Js.Tests
         public void StringTrimEnd()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.TrimEnd() == "test";
-            var js = expr.CompileToJavascript();
+            var js = expr.CompileToJavascript(ScriptVersion.Es50 | ScriptVersion.NonStandard);
             Assert.AreEqual("Name.trimRight()===\"test\"", js);
         }
 
@@ -387,7 +391,7 @@ namespace Lambda2Js.Tests
         public void StringPadLeft()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.PadLeft(1) == "est";
-            var js = expr.CompileToJavascript();
+            var js = expr.CompileToJavascript(ScriptVersion.Es80);
             Assert.AreEqual("Name.padStart(1)===\"est\"", js);
         }
 
@@ -395,7 +399,7 @@ namespace Lambda2Js.Tests
         public void StringPadRight()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.PadRight(1) == "est";
-            var js = expr.CompileToJavascript();
+            var js = expr.CompileToJavascript(ScriptVersion.Es80);
             Assert.AreEqual("Name.padEnd(1)===\"est\"", js);
         }
 

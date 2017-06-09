@@ -91,6 +91,14 @@ namespace Lambda2Js.Tests
                     JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
                     new[] { new StaticStringMethods() }));
 
+            Assert.AreEqual("(Name+\":\"+(Age+10)).indexOf(\"30\")>=0", js);
+
+            js = expr.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    JsCompilationFlags.BodyOnly | JsCompilationFlags.ScopeParameter,
+                    ScriptVersion.Es60,
+                    new[] { new StaticStringMethods() }));
+
             Assert.AreEqual("(Name+\":\"+(Age+10)).includes(\"30\")", js);
         }
 

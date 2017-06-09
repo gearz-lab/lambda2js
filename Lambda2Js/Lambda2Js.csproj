@@ -39,13 +39,14 @@
   <ItemGroup>
     <Compile Include="AttributeJavascriptMetadataProvider.cs" />
     <Compile Include="IJavascriptMemberMetadata.cs" />
+    <Compile Include="JavascriptApiFeature.cs" />
     <Compile Include="JavascriptCompilerExpressionVisitor.cs" />
     <Compile Include="JavascriptConversionContext.cs" />
     <Compile Include="JavascriptConversionExtension.cs" />
     <Compile Include="JavascriptConversionHelpers.cs" />
     <Compile Include="JavascriptMetadataProvider.cs" />
     <Compile Include="JavascriptMemberAttribute.cs" />
-    <Compile Include="JavascriptSyntax.cs" />
+    <Compile Include="JavascriptSyntaxFeature.cs" />
     <Compile Include="JavascriptWriter.cs" />
     <Compile Include="JavascriptOperationTypes.cs" />
     <Compile Include="JetBrains.Annotations.cs" />

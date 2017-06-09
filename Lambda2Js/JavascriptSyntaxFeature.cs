@@ -1,6 +1,6 @@
 namespace Lambda2Js
 {
-    public enum JavascriptSyntax
+    public enum JavascriptSyntaxFeature
     {
         ArrowFunction,
         ArraySpread

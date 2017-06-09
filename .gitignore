@@ -84,3 +84,4 @@ Uncommited/
 *.TMP
 *.nupkg
 packages/
+project.lock.json

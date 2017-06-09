@@ -81,7 +81,7 @@ namespace Lambda2Js
                             {
                                 // Ecma Script 6+: use spread operator
                                 // Other: use array `slice`
-                                if (context.Options.ScriptVersion.Supports(JavascriptSyntax.ArraySpread))
+                                if (context.Options.ScriptVersion.Supports(JavascriptSyntaxFeature.ArraySpread))
                                 {
                                     context.PreventDefault();
                                     var writer = context.GetWriter();
