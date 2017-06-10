@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using JetBrains.Annotations;
+using System.Threading;
 
 namespace Lambda2Js
 {

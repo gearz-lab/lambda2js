@@ -1,16 +1,35 @@
 ﻿{
   "name": "Lambda2Js",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Portable lambda expression to JavaScript converter.\nConverts System.Linq.ExpressionTree to syntactically correct JavaScript code.\nSee the project page for more.",
   "copyright": "Copyright Gearz 2016 - 2017",
   "title": "lambda2js (ExpressionTree to JavaScript)",
-  "authors": [ "Gearz", "Miguel Angelo (masbicudo)", "André Pena (andrerpena)" ],
-  "supports": { },
+  "authors": [
+    "Gearz",
+    "Miguel Angelo (masbicudo)",
+    "André Pena (andrerpena)"
+  ],
+  "supports": {},
   "packOptions": {
     "summary": "Portable lambda expression to JavaScript converter.",
-    "tags": [ "Expression", "Tree", "ExpressionTree", "JavaScript", "ECMA", "script", "ES5", "ES6", "converter", "gearz", "miguel", "angelo", "andre", "pena" ],
+    "tags": [
+      "Expression",
+      "Tree",
+      "ExpressionTree",
+      "JavaScript",
+      "ECMA",
+      "script",
+      "ES5",
+      "ES6",
+      "converter",
+      "gearz",
+      "miguel",
+      "angelo",
+      "andre",
+      "pena"
+    ],
     "owners": "Gearz",
-    "releaseNotes": ".Net Core support via .NETStandard1.3",
+    "releaseNotes": "New string methods supported; better script selection",
     "iconUrl": "https://raw.githubusercontent.com/gearz-lab/lambda2js/master/Lambda2Js/icon-256.png",
     "projectUrl": "https://github.com/gearz-lab/lambda2js",
     "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html",
@@ -25,6 +44,6 @@
     "NETStandard.Library": "1.6.0"
   },
   "frameworks": {
-    "netstandard1.3": { }
+    "netstandard1.3": {}
   }
 }

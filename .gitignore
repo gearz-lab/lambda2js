@@ -85,3 +85,4 @@ Uncommited/
 *.nupkg
 packages/
 project.lock.json
+.vs/config/applicationhost.config

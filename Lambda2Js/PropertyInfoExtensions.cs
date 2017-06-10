@@ -12,7 +12,7 @@ namespace Lambda2Js
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
 
-            var getMethod = property.GetMethod;
+            var getMethod = property.GetGetMethod(false);
             if (getMethod != null)
             {
                 var target = Expression.Parameter(typeof(object));

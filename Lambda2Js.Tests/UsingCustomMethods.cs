@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Reflection;
 
 namespace Lambda2Js.Tests
 {
@@ -45,8 +46,7 @@ namespace Lambda2Js.Tests
 
                 var nameAttribute = methodCallExpression?
                     .Method
-                    .GetCustomAttributes(typeof(JavascriptMethodNameAttribute),false)
-                    .OfType<JavascriptMethodNameAttribute>()
+                    .GetCustomAttributes<JavascriptMethodNameAttribute>()
                     .FirstOrDefault();
 
                 if (nameAttribute == null)
@@ -86,7 +86,7 @@ namespace Lambda2Js.Tests
 
         public class JSArray
         {
-            [JavascriptMethodName("splice", PositionalArguments = new object[] {0,1})]
+            [JavascriptMethodName("splice", PositionalArguments = new object[] { 0, 1 })]
             public JSArray RemoveAt(int index)
             {
                 throw new NotSupportedException("Never called");
