@@ -14,7 +14,7 @@ namespace Lambda2Js
     /// <summary>
     /// Expression visitor that converts each node to JavaScript code.
     /// </summary>
-    public class JavascriptCompilerExpressionVisitor : ExpressionVisitor
+    internal sealed class JavascriptCompilerExpressionVisitor : ExpressionVisitor
     {
         private readonly ParameterExpression contextParameter;
         private readonly IEnumerable<JavascriptConversionExtension> extensions;
@@ -50,8 +50,6 @@ namespace Lambda2Js
         /// </summary>
         [CanBeNull]
         public string[] UsedScopeMembers => this.usedScopeMembers?.ToArray();
-
-        public JavascriptWriter ResultWriter => this.resultWriter;
 
         public override Expression Visit(Expression node)
         {

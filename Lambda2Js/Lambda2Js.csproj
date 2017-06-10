@@ -39,14 +39,12 @@
   <ItemGroup>
     <Compile Include="AttributeJavascriptMetadataProvider.cs" />
     <Compile Include="IJavascriptMemberMetadata.cs" />
-    <Compile Include="JavascriptApiFeature.cs" />
     <Compile Include="JavascriptCompilerExpressionVisitor.cs" />
     <Compile Include="JavascriptConversionContext.cs" />
     <Compile Include="JavascriptConversionExtension.cs" />
     <Compile Include="JavascriptConversionHelpers.cs" />
     <Compile Include="JavascriptMetadataProvider.cs" />
     <Compile Include="JavascriptMemberAttribute.cs" />
-    <Compile Include="JavascriptSyntaxFeature.cs" />
     <Compile Include="JavascriptWriter.cs" />
     <Compile Include="JavascriptOperationTypes.cs" />
     <Compile Include="JetBrains.Annotations.cs" />
@@ -57,10 +55,12 @@
     <Compile Include="Plugins\EnumOptions.cs" />
     <Compile Include="Plugins\MemberInitAsJson.cs" />
     <Compile Include="PropertyInfoExtensions.cs" />
-    <Compile Include="ScriptVersion.cs" />
     <Compile Include="LambdaExpressionExtensions.cs" />
     <Compile Include="PrecedenceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScriptApiFeature.cs" />
+    <Compile Include="ScriptSyntaxFeature.cs" />
+    <Compile Include="ScriptVersion.cs" />
     <Compile Include="ScriptVersionHelper.cs" />
     <Compile Include="Plugins\StaticMathMethods.cs" />
     <Compile Include="Plugins\LinqMethods.cs" />

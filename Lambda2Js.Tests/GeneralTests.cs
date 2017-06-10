@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lambda2Js.Tests
 {
@@ -367,7 +367,7 @@ namespace Lambda2Js.Tests
         public void StringTrimStart()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.TrimStart() == "test";
-            var js = expr.CompileToJavascript(ScriptVersion.Es50 | ScriptVersion.NonStandard);
+            var js = expr.CompileToJavascript(ScriptVersion.Es50.NonStandard());
             Assert.AreEqual("Name.trimLeft()===\"test\"", js);
         }
 
@@ -375,7 +375,7 @@ namespace Lambda2Js.Tests
         public void StringTrimEnd()
         {
             Expression<Func<MyClass, bool>> expr = o => o.Name.TrimEnd() == "test";
-            var js = expr.CompileToJavascript(ScriptVersion.Es50 | ScriptVersion.NonStandard);
+            var js = expr.CompileToJavascript(ScriptVersion.Es50.NonStandard());
             Assert.AreEqual("Name.trimRight()===\"test\"", js);
         }
 
