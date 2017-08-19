@@ -15,6 +15,8 @@ Custom JavaScript output when calling a method in a custom class:
         {
             var methodCall = context.Node as MethodCallExpression;
             if (methodCall != null)
+                // This is needed to prevent default method translation
+                context.PreventDefault ();
                 if (methodCall.Method.DeclaringType == typeof(MyCustomClass))
                 {
                     switch (methodCall.Method.Name)
