@@ -24,6 +24,8 @@ See the project page for more.</Description>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Lambda2Js.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup>
