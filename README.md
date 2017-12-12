@@ -11,7 +11,7 @@ It can be extended to customize the mapping of expressions:
  - support custom static methods, instead of emiting code that would otherwise depend on external javascript
  - support custom types, converting method calls and properties accordingly
 
-It is well tesded, and won't break. **More than 70 tests passing**.
+It is well tesded, and won't break. **More than 120 tests passing**.
 
 This project uses Semantic versioning.
 
