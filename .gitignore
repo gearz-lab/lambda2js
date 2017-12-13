@@ -86,3 +86,5 @@ Uncommited/
 packages/
 project.lock.json
 .vs/config/applicationhost.config
+.vs/*
+!.vs/config/
