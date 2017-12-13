@@ -24,8 +24,8 @@ See the project page for more.</Description>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <EnableDefaultCompileItems>False</EnableDefaultCompileItems>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\Lambda2Js.snk</AssemblyOriginatorKeyFile>
+    
+    
   </PropertyGroup>
 
   <PropertyGroup>
@@ -36,8 +36,18 @@ See the project page for more.</Description>
     <DefineConstants Condition="'$(TargetFramework)'=='netstandard1.3'">NETSTANDARD1_3</DefineConstants>
     <DefineConstants Condition="$(TargetFramework.StartsWith('netstandard'))">NETSTANDARD</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='net40'">NET40</DefineConstants>
+    <PackageId>Lambda2Js</PackageId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.0|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard1.0\Lambda2Js.xml</DocumentationFile>
+    
+  </PropertyGroup>
+
+  
+  
+  
+  
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="obj\**;bin\**" />
     <Compile Condition="'$(TargetFramework)'!='net40'" Remove="**\*.net40.cs" />

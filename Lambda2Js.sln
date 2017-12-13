@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lambda2Js", "Lambda2Js\Lambda2Js.csproj", "{F7221282-1169-475B-BF81-E3EC2FF6A00A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lambda2Js", "Lambda2Js\Lambda2Js.csproj", "{F7221282-1169-475B-BF81-E3EC2FF6A00A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lambda2Js.Tests", "Lambda2Js.Tests\Lambda2Js.Tests.csproj", "{728483B9-73EA-4EF6-94CC-22D1E5053A29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lambda2Js.Tests", "Lambda2Js.Tests\Lambda2Js.Tests.csproj", "{728483B9-73EA-4EF6-94CC-22D1E5053A29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.NuGet.Net-v4.0", "Test.NuGet.Net-v4.0\Test.NuGet.Net-v4.0.csproj", "{73500DC0-3403-415C-9360-B82DCC78EFBE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Net-v4.0", "Test.Net-v4.0\Test.Net-v4.0.csproj", "{83500DC0-3403-415C-9360-B82DCC78EFBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lambda2Js.Signed", "Lambda2Js\Lambda2Js.Signed.csproj", "{C8843366-3DA1-4CF8-AD64-222872A43F20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +35,15 @@ Global
 		{83500DC0-3403-415C-9360-B82DCC78EFBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83500DC0-3403-415C-9360-B82DCC78EFBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83500DC0-3403-415C-9360-B82DCC78EFBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8843366-3DA1-4CF8-AD64-222872A43F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8843366-3DA1-4CF8-AD64-222872A43F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8843366-3DA1-4CF8-AD64-222872A43F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8843366-3DA1-4CF8-AD64-222872A43F20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CBF11506-63A9-40BE-9454-6BFEC81550CA}
 	EndGlobalSection
 EndGlobal
