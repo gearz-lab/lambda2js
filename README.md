@@ -55,3 +55,47 @@ Developing custom plugins
 --------
 
 You can develop and use some prebuilt plugins. See the [readme.md in the Plugins folder](https://github.com/gearz-lab/lambda2js/tree/master/Lambda2Js/Plugins).
+
+Building and testing
+--------------------
+
+***ATENTION!*** Please, run the **ProjectsGenerator**
+before doing any of these:
+
+- build the signed assembly
+- running tests for specific frameworks
+
+Due to current Visual Studio limitations, I had to create
+a project generator to create some of the `csproj` files:
+
+- **Lambda2Js.Signed.csproj** is generated using the
+`Lambda2Js.csproj` as it's template. It will copy the
+package version to the FileVersion and to the
+AssemblyVersion fields to keep them consistent.
+Also, it adds the `".Signed"` string where appropriate
+in file names and in project name, and finally it
+includes a reference to the snk file.
+
+- **Lambda2Js.Tests.$(TargetFramework).csproj** are
+generated from `Lambda2Js.Tests.csproj`. That is needed
+because this project is a multitargeted test project,
+and Visual Studio cannot see the tests inside after
+compiling it... so what I dis was: create copy projects
+that have only one target framework for each of the
+possible targets.
+
+**Testing**
+
+To test support on the .Net 4.0, you need to run the
+`Test.Net-v4.0.csproj` because this framework version
+does not support the native test attributes to do
+automatic testing.
+
+To test other framework versions, please, take a
+look at the `TargetedTests` solution folder. In that
+folder you will find all the tests. Unload all of them,
+but keep the framework version you want to test,
+then build it. Visual Studio will see the newly built
+tests and will list them. If the other frameworks test
+projects are not unloaded, Visual Studio may or may
+not list them.
