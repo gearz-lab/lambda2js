@@ -1,11 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net40;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net40;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
     <EnableDefaultCompileItems>False</EnableDefaultCompileItems>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Condition="'$(TargetFramework)'=='netcoreapp2.0'" Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+    <PackageReference Condition="'$(TargetFramework)'=='netcoreapp2.0'" Include="MSTest.TestAdapter" Version="1.2.0" />
+    <PackageReference Condition="'$(TargetFramework)'=='netcoreapp2.0'" Include="MSTest.TestFramework" Version="1.2.0" />
     <PackageReference Condition="'$(TargetFramework)'=='netcoreapp1.1'" Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Condition="'$(TargetFramework)'=='netcoreapp1.1'" Include="MSTest.TestAdapter" Version="1.1.11" />
     <PackageReference Condition="'$(TargetFramework)'=='netcoreapp1.1'" Include="MSTest.TestFramework" Version="1.1.11" />

@@ -4,7 +4,7 @@
     <!--TODO: support to portable40-net40+sl5+win8+wp8+wpa81-->
     <TargetFrameworks>netstandard1.0;net40</TargetFrameworks>
     <Title>lambda2js (ExpressionTree to JavaScript)</Title>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <Authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</Authors>
     <Description>Package Portable lambda expression to JavaScript converter.
 Converts System.Linq.ExpressionTree to syntactically correct JavaScript code.
@@ -24,8 +24,7 @@ See the project page for more.</Description>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <EnableDefaultCompileItems>False</EnableDefaultCompileItems>
-    
-    
+    <PackageId>Lambda2Js</PackageId>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -36,18 +35,17 @@ See the project page for more.</Description>
     <DefineConstants Condition="'$(TargetFramework)'=='netstandard1.3'">NETSTANDARD1_3</DefineConstants>
     <DefineConstants Condition="$(TargetFramework.StartsWith('netstandard'))">NETSTANDARD</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='net40'">NET40</DefineConstants>
-    <PackageId>Lambda2Js</PackageId>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.0|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard1.0\Lambda2Js.xml</DocumentationFile>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\$(TargetFramework)\Lambda2Js.xml</DocumentationFile>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
     
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.0|AnyCPU'">
+    <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
 
-  
-  
-  
-  
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="obj\**;bin\**" />
     <Compile Condition="'$(TargetFramework)'!='net40'" Remove="**\*.net40.cs" />
