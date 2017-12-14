@@ -88,3 +88,5 @@ project.lock.json
 .vs/config/applicationhost.config
 .vs/*
 !.vs/config/
+*.Signed.csproj
+Lambda2Js.Tests.*.csproj
