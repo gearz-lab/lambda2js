@@ -79,6 +79,19 @@ UpgradeLog*.XML
 UpgradeLog*.htm*
 
 # files not to be commited
+
+uncommitted/
+*.uncommitted.*
+*.uncommitted
+uncommitted
+uncommitted.*
+
+*.gen.*
+*.gen
+gen
+gen.*
+*.orig
+
 Uncommited.*
 Uncommited/
 *.TMP

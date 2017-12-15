@@ -28,6 +28,7 @@
     <Compile Include="**\*.cs" Exclude="obj\**;bin\**" />
     <Compile Condition="'$(TargetFramework)'!='net40'" Remove="**\*.net40.cs" />
     <Compile Condition="'$(TargetFramework)'!='netcoreapp1.1'" Remove="**\*.netcoreapp1.1.cs" />
+    <Compile Condition="'$(TargetFramework)'!='netcoreapp2.0'" Remove="**\*.netcoreapp2.0.cs" />
     <Compile Condition="$(TargetFramework.StartsWith('netcoreapp'))==False" Remove="**\*.netcoreapp.cs" />
     <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>

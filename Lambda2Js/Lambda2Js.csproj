@@ -42,7 +42,7 @@ See the project page for more.</Description>
     <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
     
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.0|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
 
