@@ -101,6 +101,10 @@ namespace Lambda2Js
                             leftVal.Type);
                         rightVal = binary.Right;
                     }
+                    else
+                    {
+                        return node;
+                    }
 
                     return Expression.MakeBinary(node.NodeType, leftVal, rightVal);
                 }
