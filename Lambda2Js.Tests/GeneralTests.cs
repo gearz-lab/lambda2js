@@ -675,6 +675,30 @@ namespace Lambda2Js.Tests
             var js = expr.CompileToJavascript();
             Assert.AreEqual(@"Count===1", js);
         }
+
+        [TestMethod]
+        public void BooleanConstants()
+        {
+            Expression<Func<object, bool?>> expr1 = (x) => true;
+            Expression<Func<object, bool?>> expr2 = (x) => false;
+            var js1 = expr1.CompileToJavascript();
+            var js2 = expr2.CompileToJavascript();
+            Assert.AreEqual(@"true", js1);
+            Assert.AreEqual(@"false", js2);
+        }
+
+        [TestMethod]
+        public void BooleanNullableConstants()
+        {
+            Expression<Func<string, bool?>> expr =
+                (x) =>
+                    x == "true" ? (bool?)true :
+                    x == "false" ? (bool?)false :
+                                   (bool?)null;
+
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"x===""true""?true:x===""false""?false:null", js);
+        }
     }
 
     class MyClass

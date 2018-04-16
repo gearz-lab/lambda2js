@@ -176,6 +176,11 @@ namespace Lambda2Js
                 using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                     this.resultWriter.Write(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
             }
+            else if (node.Type == typeof(bool))
+            {
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
+                    this.resultWriter.Write((bool)node.Value ? "true" : "false");
+            }
             else if (node.Type == typeof(string))
             {
                 using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
