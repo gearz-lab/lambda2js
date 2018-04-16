@@ -699,6 +699,62 @@ namespace Lambda2Js.Tests
             var js = expr.CompileToJavascript();
             Assert.AreEqual(@"x===""true""?true:x===""false""?false:null", js);
         }
+
+        [TestMethod]
+        public void CharConstant_a()
+        {
+            Expression<Func<object, char>> expr1 = (x) => 'a';
+            var js1 = expr1.CompileToJavascript();
+            Assert.AreEqual(@"""a""", js1);
+        }
+
+        [TestMethod]
+        public void CharConstant_ch0()
+        {
+            Expression<Func<object, char>> expr1 = (x) => '\0';
+            var js1 = expr1.CompileToJavascript();
+            Assert.AreEqual(@"""\0""", js1);
+        }
+
+        [TestMethod]
+        public void CharConstantInt_a()
+        {
+            Expression<Func<object, int>> expr1 = (x) => 'a';
+            var js1 = expr1.CompileToJavascript();
+            Assert.AreEqual(@"97", js1);
+        }
+
+        [TestMethod]
+        public void CharConstantInt_ch0()
+        {
+            Expression<Func<object, int>> expr1 = (x) => '\0';
+            var js1 = expr1.CompileToJavascript();
+            Assert.AreEqual(@"0", js1);
+        }
+
+        [TestMethod]
+        public void CharConstant_Sum()
+        {
+            Expression<Func<char, int>> expr1 = (x) => x + 'a';
+            var js1 = expr1.CompileToJavascript();
+            Assert.AreEqual(@"x+97", js1);
+        }
+
+        [TestMethod]
+        public void CharConstant_Concat()
+        {
+            Expression<Func<string, string>> expr1 = (x) => x + 'a';
+            var js1 = expr1.CompileToJavascript();
+            Assert.AreEqual(@"x+""a""", js1);
+        }
+
+        [TestMethod]
+        public void Char2Number()
+        {
+            Expression<Func<char, short>> expr1 = (x) => (short)x;
+            var js1 = expr1.CompileToJavascript();
+            Assert.AreEqual(@"x", js1);
+        }
     }
 
     class MyClass

@@ -186,6 +186,11 @@ namespace Lambda2Js
                 using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                     this.WriteStringLiteral((string)node.Value);
             }
+            else if (node.Type == typeof(char))
+            {
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
+                    this.WriteStringLiteral(node.Value.ToString());
+            }
             else if (node.Value == null)
             {
                 this.resultWriter.Write("null");
