@@ -667,6 +667,14 @@ namespace Lambda2Js.Tests
             // TODO: this case could be optimized
             Assert.AreEqual(@"Phones.length===0?1+10:2+10", js);
         }
+
+        [TestMethod]
+        public void CanCompareToNullable()
+        {
+            Expression<Func<MyClass, bool>> expr = o => o.Count == 1;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Count===1", js);
+        }
     }
 
     class MyClass
@@ -675,6 +683,7 @@ namespace Lambda2Js.Tests
         public Dictionary<string, Phone> PhonesByName { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
+        public int? Count { get; set; }
     }
 
     class Phone
