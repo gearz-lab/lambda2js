@@ -1113,6 +1113,29 @@ namespace Lambda2Js
                         return node;
                     }
                 }
+                else if (node.Method.Name == nameof(string.Concat))
+                {
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.Concat))
+                    {
+                        if (node.Arguments.Count == 0)
+                            this.resultWriter.Write("''");
+                        else
+                        {
+                            if (node.Arguments[0].Type != typeof(string))
+                                this.resultWriter.Write("''+");
+
+                            var posStart = this.resultWriter.Length;
+                            foreach (var arg in node.Arguments)
+                            {
+                                if (this.resultWriter.Length > posStart)
+                                    this.resultWriter.Write('+');
+                                this.Visit(arg);
+                            }
+                        }
+
+                        return node;
+                    }
+                }
             }
 
             if (node.Method.Name == "ToString" && node.Type == typeof(string) && node.Object != null)
