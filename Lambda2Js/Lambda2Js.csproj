@@ -4,15 +4,14 @@
     <!--TODO: support to portable40-net40+sl5+win8+wp8+wpa81-->
     <TargetFrameworks>netstandard1.0;net40</TargetFrameworks>
     <Title>lambda2js (ExpressionTree to JavaScript)</Title>
-    <Version>3.0.2</Version>
+    <Version>3.1.0</Version>
     <Authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</Authors>
     <Description>Package Portable lambda expression to JavaScript converter.
 Converts System.Linq.ExpressionTree to syntactically correct JavaScript code.
 See the project page for more.</Description>
-    <Copyright>Copyright Gearz 2016 - 2017</Copyright>
+    <Copyright>Copyright Gearz 2016 - 2018</Copyright>
     <Product>Lambda2Js</Product>
-    <PackageReleaseNotes>.Net Core support via .NETStandard1.0
-.Net 4.0 support</PackageReleaseNotes>
+    <PackageReleaseNotes>Support bool and char literal constants out of the box.</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/gearz-lab/lambda2js/master/Lambda2Js/icon-256.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/gearz-lab/lambda2js</PackageProjectUrl>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
