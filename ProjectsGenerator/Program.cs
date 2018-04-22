@@ -10,8 +10,6 @@ namespace ProjectsGenerator
 
         static void Main(string[] args)
         {
-            Console.WriteLine($"Environment.CurrentDirectory = {Environment.CurrentDirectory}");
-
             // TEST PROJECTS:
             //
             // Test projects are generated from the main multi-targeted test project:
@@ -19,10 +17,15 @@ namespace ProjectsGenerator
 
             {
 
-                var l2jsTests = new XmlDocument();
-                l2jsTests.Load($"../{ProjectName}.Tests/{ProjectName}.Tests.csproj");
+                var testsProjXml = new XmlDocument();
+                var pathProj = $"../{ProjectName}.Tests/{ProjectName}.Tests.csproj";
 
-                var targetsElement = l2jsTests.SelectNodes("//TargetFrameworks");
+                FindAndSetCurrentPath(pathProj);
+                Console.WriteLine($"Environment.CurrentDirectory = {Environment.CurrentDirectory}");
+
+                testsProjXml.Load(pathProj);
+
+                var targetsElement = testsProjXml.SelectNodes("//TargetFrameworks");
                 Console.WriteLine(targetsElement[0].InnerText);
                 var targets = targetsElement[0].InnerText.Split(";");
                 foreach (var target in targets)
@@ -30,12 +33,12 @@ namespace ProjectsGenerator
                     if (File.Exists($"../{ProjectName}.Tests/{ProjectName}.Tests.{target}.csproj"))
                         continue;
 
-                    var l2jsTestNew = (XmlDocument)l2jsTests.Clone();
-                    var node = l2jsTestNew.SelectSingleNode("//TargetFrameworks");
-                    var targetElement = l2jsTestNew.CreateElement("TargetFramework");
+                    var testProjXml_2 = (XmlDocument)testsProjXml.Clone();
+                    var node = testProjXml_2.SelectSingleNode("//TargetFrameworks");
+                    var targetElement = testProjXml_2.CreateElement("TargetFramework");
                     targetElement.InnerText = target;
                     node.ParentNode.ReplaceChild(targetElement, node);
-                    l2jsTestNew.Save($"../{ProjectName}.Tests/{ProjectName}.Tests.{target}.csproj");
+                    testProjXml_2.Save($"../{ProjectName}.Tests/{ProjectName}.Tests.{target}.csproj");
                 }
 
             }
@@ -46,10 +49,10 @@ namespace ProjectsGenerator
 
             {
 
-                var l2js = new XmlDocument();
-                l2js.Load($"../{ProjectName}/{ProjectName}.csproj");
+                var projXml = new XmlDocument();
+                projXml.Load($"../{ProjectName}/{ProjectName}.csproj");
 
-                var sig = (XmlDocument)l2js.Clone();
+                var sig = (XmlDocument)projXml.Clone();
                 var sigMain = sig.SelectSingleNode("//TargetFrameworks").ParentNode;
                 var ver = sigMain.SelectSingleNode("Version").InnerText;
 
@@ -76,6 +79,23 @@ namespace ProjectsGenerator
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
+        }
+
+        private static void FindAndSetCurrentPath(string pathProj)
+        {
+            while (true)
+            {
+                try
+                {
+                    if (File.Exists(pathProj))
+                        break;
+                }
+                catch (Exception)
+                {
+                }
+
+                Environment.CurrentDirectory = Path.GetDirectoryName(Environment.CurrentDirectory);
+            }
         }
     }
 
