@@ -16,24 +16,26 @@ namespace Lambda2Js
                 {
                     switch (methodCall.Method.Name)
                     {
-                        case "Concat":
-                            {
-                                context.PreventDefault();
-                                var writer = context.GetWriter();
-                                using (writer.Operation(JavascriptOperationTypes.Concat))
-                                {
-                                    if (methodCall.Arguments.Count == 0)
-                                        writer.Write("''");
-                                    else
-                                    {
-                                        if (GetTypeOfExpression(methodCall.Arguments[0]) != typeof(string))
-                                            writer.Write("''+");
-                                        context.WriteMany('+', methodCall.Arguments);
-                                    }
-                                }
+                        // TODO: to support VB string concat operator `&` we must do this by default... so this code is not necessary
+                        // TODO: decide whether this will be the default or not
+                        //case "Concat":
+                        //    {
+                        //        context.PreventDefault();
+                        //        var writer = context.GetWriter();
+                        //        using (writer.Operation(JavascriptOperationTypes.Concat))
+                        //        {
+                        //            if (methodCall.Arguments.Count == 0)
+                        //                writer.Write("''");
+                        //            else
+                        //            {
+                        //                if (GetTypeOfExpression(methodCall.Arguments[0]) != typeof(string))
+                        //                    writer.Write("''+");
+                        //                context.WriteMany('+', methodCall.Arguments);
+                        //            }
+                        //        }
 
-                                return;
-                            }
+                        //        return;
+                        //    }
 
                         case "Join":
                             {

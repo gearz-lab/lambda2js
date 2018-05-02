@@ -54,9 +54,11 @@ namespace Lambda2Js
         public override Expression Visit(Expression node)
         {
             var node2 = PreprocessNode(node);
-            var context = new JavascriptConversionContext(node2, this, this.resultWriter, this.Options);
+            JavascriptConversionContext context = null;
             foreach (var each in this.extensions)
             {
+                context = context ?? new JavascriptConversionContext(node2, this, this.resultWriter, this.Options);
+
                 each.ConvertToJavascript(context);
 
                 if (context.preventDefault)
@@ -176,10 +178,20 @@ namespace Lambda2Js
                 using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                     this.resultWriter.Write(Convert.ToString(node.Value, CultureInfo.InvariantCulture));
             }
+            else if (node.Type == typeof(bool))
+            {
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
+                    this.resultWriter.Write((bool)node.Value ? "true" : "false");
+            }
             else if (node.Type == typeof(string))
             {
                 using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                     this.WriteStringLiteral((string)node.Value);
+            }
+            else if (node.Type == typeof(char))
+            {
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
+                    this.WriteStringLiteral(node.Value.ToString());
             }
             else if (node.Value == null)
             {
@@ -1099,6 +1111,29 @@ namespace Lambda2Js
                         }
 
                         this.resultWriter.Write(')');
+
+                        return node;
+                    }
+                }
+                else if (node.Method.Name == nameof(string.Concat))
+                {
+                    using (this.resultWriter.Operation(JavascriptOperationTypes.Concat))
+                    {
+                        if (node.Arguments.Count == 0)
+                            this.resultWriter.Write("''");
+                        else
+                        {
+                            if (node.Arguments[0].Type != typeof(string))
+                                this.resultWriter.Write("''+");
+
+                            var posStart = this.resultWriter.Length;
+                            foreach (var arg in node.Arguments)
+                            {
+                                if (this.resultWriter.Length > posStart)
+                                    this.resultWriter.Write('+');
+                                this.Visit(arg);
+                            }
+                        }
 
                         return node;
                     }
