@@ -109,9 +109,16 @@ namespace Lambda2Js
             var type = attr.GetType();
             var accessor = GetAccessors(type);
 
+            var memberName = accessor.PropertyNameGetter?.Invoke(attr);
+
+            if (string.IsNullOrEmpty(memberName))
+            {
+                return null;
+            }
+
             return new JavascriptMemberAttribute
             {
-                MemberName = accessor.PropertyNameGetter?.Invoke(attr),
+                MemberName = memberName,
             };
         }
 
