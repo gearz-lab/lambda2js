@@ -48,29 +48,31 @@ namespace Lambda2Js
         private IJavascriptMemberMetadata GetMemberMetadataWithCache([NotNull] MemberInfo memberInfo)
         {
             IJavascriptMemberMetadata value;
-            if (cache.TryGetValue(memberInfo, out value))
+            if (this.cache.TryGetValue(memberInfo, out value))
                 return value;
 
             lock (this.locker)
             {
-                if (cache.TryGetValue(memberInfo, out value))
+                if (this.cache.TryGetValue(memberInfo, out value))
                     return value;
 
                 var meta = GetMemberMetadataNoCache(memberInfo);
+
+                // Have to create a new instance here, because readers don't have any
+                // syncronization with writers. I.e. when executing the line
+                // `cache.TryGetValue` outside of the lock (above), if the same
+                // instance was added to, then that method could get the wrong result.
+                var newCache = new Dictionary<MemberInfo, IJavascriptMemberMetadata>(cache)
+                    {
+                        [memberInfo] = meta
+                    };
 
                 // This memory barrier is needed if this class is ever used in
                 // a weaker memory model implementation, allowed by the CLR
                 // specification.
                 Interlocked.MemoryBarrier();
 
-                // Have to create a new instance here, because readers don't have any
-                // syncronization with writers. I.e. when executing the line
-                // `cache.TryGetValue` outside of the lock (above), if the same
-                // instance was added to, then that method could get the wrong result.
-                cache = new Dictionary<MemberInfo, IJavascriptMemberMetadata>(cache)
-                {
-                    [memberInfo] = meta
-                };
+                this.cache = newCache;
                 return meta;
             }
         }
@@ -95,6 +97,7 @@ namespace Lambda2Js
         /// Gets metadata about a property that is going to be used in JavaScript code.
         /// </summary>
         /// <param name="memberInfo"></param>
+        /// <param name="useCache"></param>
         /// <returns></returns>
         public IJavascriptMemberMetadata GetMemberMetadata([NotNull] MemberInfo memberInfo, bool useCache)
         {
@@ -111,6 +114,8 @@ namespace Lambda2Js
 
             var memberName = accessor.PropertyNameGetter?.Invoke(attr);
 
+            // TODO: supporting JsonPropertyAttribute members would be nice
+            //  e.g. NullValueHandling.Ignore - does not write variable to javascript object if the value is null
             if (string.IsNullOrEmpty(memberName))
             {
                 return null;
@@ -132,22 +137,32 @@ namespace Lambda2Js
         private Accessors GetAccessors(Type type)
         {
             Accessors value;
-            if (accessors.TryGetValue(type, out value))
+            if (this.accessors.TryGetValue(type, out value))
                 return value;
-            lock (this)
+
+            lock (this.locker)
             {
-                if (accessors.TryGetValue(type, out value))
+                if (this.accessors.TryGetValue(type, out value))
                     return value;
+
                 var accessor = new Accessors
                 {
                     PropertyNameGetter = type.GetTypeInfo().GetDeclaredProperty("PropertyName")?.MakeGetterDelegate<string>()
                 };
+
                 // have to create a new instance here, because readers don't have any
                 // syncronization with writers.
-                accessors = new Dictionary<Type, Accessors>(accessors)
-                {
-                    [type] = accessor
-                };
+                var newAccessors = new Dictionary<Type, Accessors>(accessors)
+                    {
+                        [type] = accessor
+                    };
+
+                // This memory barrier is needed if this class is ever used in
+                // a weaker memory model implementation, allowed by the CLR
+                // specification.
+                Interlocked.MemoryBarrier();
+
+                this.accessors = newAccessors;
                 return accessor;
             }
         }
