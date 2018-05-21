@@ -36,6 +36,9 @@ namespace Lambda2Js.Tests
 
             [JsonProperty(PropertyName = "otherName2")]
             public string Custom2 { get; set; }
+            
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public string Custom3 { get; set; }
         }
 
         public class MyCustomClassMethods : JavascriptConversionExtension
@@ -161,6 +164,14 @@ namespace Lambda2Js.Tests
             Expression<Func<MyCustomClass, string>> expr = o => o.Custom2;
             var js = expr.CompileToJavascript();
             Assert.AreEqual(@"otherName2", js);
+        }
+
+        [TestMethod]
+        public void CustomMetadata3()
+        {
+            Expression<Func<MyCustomClass, string>> expr = o => o.Custom3;
+            var js = expr.CompileToJavascript();
+            Assert.AreEqual(@"Custom3", js);
         }
 
         public class MyClassBase
