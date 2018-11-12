@@ -155,6 +155,28 @@ namespace Lambda2Js.Tests
                     new EnumConversionExtension(EnumOptions.FlagsAsArray | EnumOptions.UseStrings)));
             Assert.AreEqual(@"[""B"",""A""]", js);
         }
+
+        [TestMethod]
+        public void EnumAsStringEquals()
+        {
+            Expression<Func<MyClassWithEnum, bool>> expr = doc => doc.SomeFlagsEnum == SomeFlagsEnum.B;
+            var js = expr.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    JsCompilationFlags.BodyOnly,
+                    new EnumConversionExtension(EnumOptions.UseStrings)));
+            Assert.AreEqual(@"doc.SomeFlagsEnum===""B""", js);
+        }
+
+        [TestMethod]
+        public void EnumAsStringNotEquals()
+        {
+            Expression<Func<MyClassWithEnum, bool>> expr = doc => doc.SomeFlagsEnum != SomeFlagsEnum.B;
+            var js = expr.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    JsCompilationFlags.BodyOnly,
+                    new EnumConversionExtension(EnumOptions.UseStrings)));
+            Assert.AreEqual(@"doc.SomeFlagsEnum!==""B""", js);
+        }
     }
 
     public class MyCustomClassEnumMethods : JavascriptConversionExtension
