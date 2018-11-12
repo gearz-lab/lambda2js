@@ -80,7 +80,8 @@ namespace Lambda2Js
                 || node.NodeType == ExpressionType.ExclusiveOr
                 || node.NodeType == ExpressionType.OrAssign
                 || node.NodeType == ExpressionType.AndAssign
-                || node.NodeType == ExpressionType.ExclusiveOrAssign)
+                || node.NodeType == ExpressionType.ExclusiveOrAssign
+                || node.NodeType == ExpressionType.NotEqual)
             {
                 var binary = (BinaryExpression)node;
                 var left = binary.Left as UnaryExpression;
