@@ -10,7 +10,7 @@ It can be extended to customize the mapping of expressions:
 - support custom static methods, instead of emitting code that would otherwise depend on external Javascript
 - support custom types, converting method calls and properties accordingly
 
-It is well tested, and won't break. **More than 120 tests passing**.
+It is well tested, and won't break. **More than 140 tests passing**.
 
 This project uses Semantic versioning.
 
@@ -55,14 +55,15 @@ Developing custom plugins
 
 You can develop and use some built-in plugins. See the [readme.md in the Plugins folder](https://github.com/gearz-lab/lambda2js/tree/master/Lambda2Js/Plugins).
 
-Building and testing
---------------------
+# Building and testing
 
 ***ATENTION!*** Please, run the **ProjectsGenerator**
 before doing any of these:
 
 - build the signed assembly
 - running tests for specific frameworks
+
+    ![Run Projects Generator](docs/images/RunProjectsGenerator.png)
 
 Due to current Visual Studio limitations, I had to create
 a project generator to create some of the `csproj` files:
@@ -83,7 +84,7 @@ compiling it... so what I did was: create copy projects
 that have only one target framework for each of the
 possible targets.
 
-**Testing**
+## Testing
 
 To test support on the .Net 4.0, you need to run the
 `Test.Net-v4.0.csproj` because this framework version
@@ -98,3 +99,15 @@ then build it. Visual Studio will see the newly built
 tests and will list them. If the other frameworks test 
 projects are not unloaded, Visual Studio may or may 
 not list them.
+
+**Errors while building test projects**
+
+Make sure to NOT LOAD MORE THAN ONE test project inside the TargetedTests solution folder.
+
+- Load a single test project
+
+    ![Load Single Test Project](docs/images/LoadSingleTestProject.png)
+
+- Update Test Framework Packages
+
+    ![Update Test Framework Packages](docs/images/UpdateTestFrameworkPackages.png)
