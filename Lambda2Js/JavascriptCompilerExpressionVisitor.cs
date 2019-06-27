@@ -184,11 +184,6 @@ namespace Lambda2Js
                 using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
                     this.resultWriter.Write((bool)node.Value ? "true" : "false");
             }
-            else if (node.Type == typeof(string))
-            {
-                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
-                    this.WriteStringLiteral((string)node.Value);
-            }
             else if (node.Type == typeof(char))
             {
                 using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
@@ -197,6 +192,11 @@ namespace Lambda2Js
             else if (node.Value == null)
             {
                 this.resultWriter.Write("null");
+            }
+            else if (node.Type == typeof(string))
+            {
+                using (this.resultWriter.Operation(JavascriptOperationTypes.Literal))
+                    this.WriteStringLiteral((string)node.Value);
             }
             else if (node.Type.GetTypeInfo().IsEnum)
             {

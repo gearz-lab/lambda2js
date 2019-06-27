@@ -524,6 +524,30 @@ namespace Lambda2Js.Tests
         }
 
         [TestMethod]
+        public void ObjectNullLiteral()
+        {
+            Expression<Func<MyClass>> expr = () => null;
+            var js = expr.Body.CompileToJavascript();
+            Assert.AreEqual("null", js);
+        }
+
+        [TestMethod]
+        public void NullLiteralToInt()
+        {
+            Expression<Func<int?>> expr = () => null;
+            var js = expr.Body.CompileToJavascript();
+            Assert.AreEqual("null", js);
+        }
+
+        [TestMethod]
+        public void NullLiteralToString()
+        {
+            Expression<Func<string>> expr = () => null;
+            var js = expr.Body.CompileToJavascript();
+            Assert.AreEqual("null", js);
+        }
+
+        [TestMethod]
         public void StringAdd1()
         {
             Expression<Func<MyClass, string>> expr = o => o.Name + ":" + 10;
