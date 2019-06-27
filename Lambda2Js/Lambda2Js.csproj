@@ -4,17 +4,17 @@
     <!--TODO: support to portable40-net40+sl5+win8+wp8+wpa81-->
     <TargetFrameworks>netstandard1.0;net40</TargetFrameworks>
     <Title>lambda2js (ExpressionTree to JavaScript)</Title>
-    <Version>3.1.0</Version>
+    <Version>3.1.3</Version>
     <Authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</Authors>
-    <Description>Package Portable lambda expression to JavaScript converter.
-Converts System.Linq.ExpressionTree to syntactically correct JavaScript code.
+    <Description>Lambda expression to JavaScript converter:
+converts System.Linq.ExpressionTree to syntactically correct JavaScript code.
 See the project page for more.</Description>
-    <Copyright>Copyright Gearz 2016 - 2018</Copyright>
+    <Copyright>Copyright Gearz and Contributors 2016 - 2019</Copyright>
     <Product>Lambda2Js</Product>
     <PackageReleaseNotes>Support bool and char literal constants out of the box.</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/gearz-lab/lambda2js/master/Lambda2Js/icon-256.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/gearz-lab/lambda2js</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/gearz-lab/lambda2js</RepositoryUrl>
     <PackageTags>Expression Tree ExpressionTree JavaScript ECMAScript ES5 ES6 converter gearz miguel angelo andre pena</PackageTags>
@@ -52,6 +52,10 @@ See the project page for more.</Description>
     <Compile Condition="'$(TargetFramework)'!='netstandard1.3'" Remove="**\*.netstandard1.3.cs" />
     <Compile Condition="$(TargetFramework.StartsWith('netstandard'))==False" Remove="**\*.netstandard.cs" />
     <EmbeddedResource Include="**\*.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="LICENSE.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
   </ItemGroup>
 
 </Project>
