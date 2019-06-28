@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Test.NuGet.Net_v4._0
+namespace TestRunner
 {
-    internal class Assert
+    internal class MyAssert : Asserter
     {
-        public static void AreEqual<T>(T expected, T value)
+        public override void AreEqual<T>(T expected, T value)
         {
             var prev = Console.ForegroundColor;
             var eql = EqualityComparer<T>.Default.Equals(expected, value);
@@ -34,7 +35,7 @@ namespace Test.NuGet.Net_v4._0
             return value.ToString();
         }
 
-        public static void IsInstanceOfType(object value, Type expectedType, string message)
+        public override void IsInstanceOfType(object value, Type expectedType, string message)
         {
             var prev = Console.ForegroundColor;
             var ok = value != null && expectedType.IsAssignableFrom(value.GetType());

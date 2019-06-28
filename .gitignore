@@ -103,3 +103,5 @@ project.lock.json
 !.vs/config/
 *.Signed.csproj
 Lambda2Js.Tests.*.csproj
+/Lambda2Js.Tests/Lambda2Js.NuGet.Tests.*.csproj
+/Lambda2Js.Tests/Lambda2Js.NuGet.Signed.Tests.*.csproj
