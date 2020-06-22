@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -36,9 +37,20 @@ namespace Lambda2Js.Tests
 
             [JsonProperty(PropertyName = "otherName2")]
             public string Custom2 { get; set; }
-            
+
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Custom3 { get; set; }
+
+            public Dictionary<string, object> Dictionary { get; set; }
+
+            public List<string> List { get; set; }
+            
+            public NestedThing Nested { get; set; }
+        }
+
+        public class NestedThing
+        {
+            public string Name { get; set; }
         }
 
         public class MyCustomClassMethods : JavascriptConversionExtension
@@ -149,6 +161,77 @@ namespace Lambda2Js.Tests
 
             Assert.IsInstanceOfType(exception, typeof(NotSupportedException), "Exception not thrown.");
         }
+
+        [TestMethod]
+        public void NewCustomClassWithNestedThingInit()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass { Name = "Miguel", Nested = { Name = "Nested" } };
+
+            var js = expr.Body.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    new MemberInitAsJson(typeof(MyCustomClass))));
+
+            Assert.AreEqual("{Name:\"Miguel\",Nested:{Name:\"Nested\"}}", js);
+        }
+
+        [TestMethod]
+        public void NewCustomClassWithNestedThingConstructorFailsWithDisallowedTypeInit()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass { Name = "Miguel", Nested = new NestedThing { Name = "Nested" } };
+
+            Exception exception = null;
+            try
+            {
+                expr.Body.CompileToJavascript(
+                    new JavascriptCompilationOptions(
+                        new MemberInitAsJson(typeof(MyCustomClass))));
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            Assert.IsInstanceOfType(exception, typeof(NotSupportedException), "Exception not thrown.");
+        }
+
+        [TestMethod]
+        public void NewCustomClassWithNestedThingConstructorInit()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass { Name = "Miguel", Nested = new NestedThing { Name = "Nested" } };
+
+            var js = expr.Body.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    new MemberInitAsJson(typeof(MyCustomClass), typeof(NestedThing))));
+
+            Assert.AreEqual("{Name:\"Miguel\",Nested:{Name:\"Nested\"}}", js);
+        }
+        
+        [TestMethod]
+        public void NewCustomClassWithListInit()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass { Name = "Miguel", List = { "One", "Two" } };
+
+            var js = expr.Body.CompileToJavascript(
+                new JavascriptCompilationOptions(
+                    new MemberInitAsJson(typeof(MyCustomClass))));
+
+            Assert.AreEqual("{Name:\"Miguel\",List:[\"One\",\"Two\"]}", js);
+        }
+
+        //This Dictionary constructor is only present for netstandard 2.0 or later (netcoreapp2.0 tests, not netcoreapp1.0)
+#if !NETCOREAPP1_1
+        [TestMethod]
+        public void NewCustomClassWithDictionaryFromListConstructorInit()
+        {
+            Expression<Func<MyCustomClass>> expr = () => new MyCustomClass
+                    { Name = "Miguel", Dictionary = new Dictionary<string, object>(new[] { new KeyValuePair<string, object>("One", 1), new KeyValuePair<string, object>("Two", 2) }) };
+
+            var js = expr.Body.CompileToJavascript(
+                new JavascriptCompilationOptions(MemberInitAsJson.ForAllTypes));
+
+            Assert.AreEqual("{Name:\"Miguel\",Dictionary:{\"One\":1,\"Two\":2}}", js);
+        }
+#endif
 
         [TestMethod]
         public void CustomMetadata1()
