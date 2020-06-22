@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
@@ -51,19 +53,22 @@ namespace Lambda2Js
             this.TypePredicate = typePredicate;
         }
 
+        private bool IsAcceptableType(Type type)
+        {
+            var typeOk1 = NewObjectTypes?.Contains(type) ?? false;
+            var typeOk2 = TypePredicate?.Invoke(type) ?? false;
+            var typeOk3 = NewObjectTypes == null && TypePredicate == null;
+            
+            return typeOk1 || typeOk2 || typeOk3;
+        }
+
         public override void ConvertToJavascript(JavascriptConversionContext context)
         {
             var initExpr = context.Node as MemberInitExpression;
             if (initExpr == null)
                 return;
-            var typeOk1 = this.NewObjectTypes?.Contains(initExpr.Type) ?? false;
-            var typeOk2 = this.TypePredicate?.Invoke(initExpr.Type) ?? false;
-            var typeOk3 = this.NewObjectTypes == null && this.TypePredicate == null;
-            if (!typeOk1 && !typeOk2 && !typeOk3)
-                return;
-            if (initExpr.NewExpression.Arguments.Count > 0)
-                return;
-            if (initExpr.Bindings.Any(mb => mb.BindingType != MemberBindingType.Assignment))
+
+            if (!IsAcceptableType(initExpr.Type))
                 return;
 
             context.PreventDefault();
@@ -72,26 +77,123 @@ namespace Lambda2Js
             {
                 writer.Write('{');
 
-                var posStart = writer.Length;
-                foreach (var assignExpr in initExpr.Bindings.Cast<MemberAssignment>())
+                foreach (var binding in initExpr.Bindings)
                 {
-                    if (writer.Length > posStart)
+                    if(binding != initExpr.Bindings[0])
                         writer.Write(',');
 
-                    var metadataProvider = context.Options.GetMetadataProvider();
-                    var meta = metadataProvider.GetMemberMetadata(assignExpr.Member);
-                    var memberName = meta?.MemberName;
-                    Debug.Assert(!string.IsNullOrEmpty(memberName), "!string.IsNullOrEmpty(memberName)");
-                    if (Regex.IsMatch(memberName, @"^\w[\d\w]*$"))
-                        writer.Write(memberName);
-                    else
-                        writer.WriteLiteral(memberName);
-
-                    writer.Write(':');
-                    context.Visitor.Visit(assignExpr.Expression);
+                    WriteBinding(context, binding, writer);
                 }
 
                 writer.Write('}');
+            }
+        }
+
+        /// <summary>
+        /// Recursively callable WriteBinding() for MemberMemberBinding case
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="binding"></param>
+        /// <param name="writer"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="NotImplementedException"></exception>
+        /// <exception cref="NotSupportedException"></exception>
+        private void WriteBinding(JavascriptConversionContext context, MemberBinding binding, JavascriptWriter writer)
+        {
+            var metadataProvider = context.Options.GetMetadataProvider();
+            var meta = metadataProvider.GetMemberMetadata(binding.Member);
+            var memberName = meta?.MemberName;
+            Debug.Assert(!string.IsNullOrEmpty(memberName), "!string.IsNullOrEmpty(memberName)");
+            if (Regex.IsMatch(memberName, @"^\w[\d\w]*$"))
+                writer.Write(memberName);
+            else
+                writer.WriteLiteral(memberName);
+
+            writer.Write(':');
+
+            if (binding is MemberAssignment ma)
+            {
+                if (ma.Expression is NewExpression ne)
+                {
+                    if(!IsAcceptableType(ne.Type))
+                        throw new InvalidOperationException($"Unable to initialize type: {ne.Type.FullName}");
+
+                    if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(ne.Type.GetTypeInfo()))
+                    {
+                        writer.Write('{');
+
+                        //Expressions don't support dictionary initializer syntax, so...
+                        //Handle Dictionary(IEnumerable<KVP>) constructor - new Dictionary<string, Thing>(new[] { new KeyValuePair<string, Thing>("One", new Thing { Name = "Fred" }) }) 
+                        if (ne.Arguments.Count == 1 && ne.Arguments[0] is NewArrayExpression nae)
+                        {
+                            foreach (var nie in nae.Expressions)
+                            {
+                                if (nie is NewExpression newItem)
+                                {
+                                    //Get KVP constructor args for Key and Value
+                                    var key = newItem.Arguments[0];
+                                    var value = newItem.Arguments[1];
+                                    if(nie != nae.Expressions[0])
+                                        writer.Write(',');
+                                    context.Visitor.Visit(key);
+                                    writer.Write(':');
+                                    context.Visitor.Visit(value);
+                                }
+                                else
+                                {
+                                    throw new NotSupportedException($"Not supported for Dictionary item expression: {nie}");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            throw new NotSupportedException($"Not supported for Dictionary constructor with {ne.Arguments.Count} arguments: {ne}");
+                        }
+
+                        writer.Write('}');
+                    }
+                    else
+                    {
+                        throw new NotSupportedException($"Not supported for non-dictionary constructor: {ne}");
+                    }
+                    
+                }
+                else
+                {
+                    context.Visitor.Visit(ma.Expression);
+                }
+                
+            }
+            else if (binding is MemberMemberBinding mmb)
+            {
+                //Nested object initializers: new Thing{ Nested = new NestedThing { Name="Fred" } }
+                writer.Write('{');
+                foreach (var mb in mmb.Bindings)
+                {
+                    if (mb != mmb.Bindings[0])
+                        writer.Write(',');
+                    WriteBinding(context, mb, writer);
+                }
+                writer.Write('}');
+            }
+            else if (binding is MemberListBinding mlb)
+            {
+                //List binding
+                
+                writer.Write('[');
+
+                foreach (var initializer in mlb.Initializers)
+                {
+                    if (initializer != mlb.Initializers[0])
+                        writer.Write(",");
+                    context.Visitor.Visit(initializer.Arguments[0]);
+                }
+
+                writer.Write(']');
+            }
+            else
+            {
+                throw new NotSupportedException($"Unsupported: {binding.Member.Name} - {binding.BindingType} ({binding.GetType().FullName})");
             }
         }
     }
