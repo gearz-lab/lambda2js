@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!--TODO: support to portable40-net40+sl5+win8+wp8+wpa81-->
-    <TargetFrameworks>netstandard1.0;net40</TargetFrameworks>
+    <TargetFrameworks>netstandard1.0;netstandard2.0;net40</TargetFrameworks>
     <Title>lambda2js (ExpressionTree to JavaScript)</Title>
     <Version>3.1.3</Version>
     <Authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</Authors>
@@ -56,6 +56,10 @@ See the project page for more.</Description>
 
   <ItemGroup>
     <None Include="LICENSE.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
