@@ -37,6 +37,7 @@ See the project page for more.</Description>
     <DefineConstants Condition="'$(TargetFramework)'=='netstandard1.3'">NETSTANDARD1_3</DefineConstants>
     <DefineConstants Condition="$(TargetFramework.StartsWith('netstandard'))">NETSTANDARD</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='net40'">NET40</DefineConstants>
+    <PackageIcon>icon-512.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -66,6 +67,13 @@ See the project page for more.</Description>
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="icon-512.png">
+      <Pack>true</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
