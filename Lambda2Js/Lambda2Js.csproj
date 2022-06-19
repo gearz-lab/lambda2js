@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--TODO: support to portable40-net40+sl5+win8+wp8+wpa81-->
     <TargetFrameworks>netstandard1.0;netstandard2.0;net40</TargetFrameworks>
     <Title>lambda2js (ExpressionTree to JavaScript)</Title>
-    <Version>3.1.3</Version>
+    <Version>3.1.4</Version>
     <Authors>Gearz, Miguel Angelo (masbicudo), André Pena (andrerpena)</Authors>
     <Description>Lambda expression to JavaScript converter:
 converts System.Linq.ExpressionTree to syntactically correct JavaScript code.
 See the project page for more.</Description>
-    <Copyright>Copyright Gearz and Contributors 2016 - 2019</Copyright>
+    <Copyright>Copyright Gearz and Contributors 2016 - 2023</Copyright>
     <Product>Lambda2Js</Product>
-    <PackageReleaseNotes>Support bool and char literal constants out of the box.</PackageReleaseNotes>
+    <PackageReleaseNotes>3.1.4 Update .NET dependencies
+3.1.3 Support bool and char literal constants out of the box.</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/gearz-lab/lambda2js/master/Lambda2Js/icon-256.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/gearz-lab/lambda2js</PackageProjectUrl>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -30,6 +30,9 @@ See the project page for more.</Description>
     <DefineConstants Condition="'$(Configuration)'=='Release'">RELEASE</DefineConstants>
     <DefineConstants Condition="'$(Configuration)'=='Debug'">DEBUG</DefineConstants>
     <DefineConstants Condition="'$(Platform)'=='AnyCPU'">ANYCPU</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='net7.0'">NET7_0</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='net6.0'">NET6_0</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='net5.0'">NET5_0</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='netstandard1.0'">NETSTANDARD1_0</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='netstandard1.3'">NETSTANDARD1_3</DefineConstants>
     <DefineConstants Condition="$(TargetFramework.StartsWith('netstandard'))">NETSTANDARD</DefineConstants>
@@ -47,6 +50,9 @@ See the project page for more.</Description>
 
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="obj\**;bin\**" />
+    <Compile Condition="'$(TargetFramework)'!='net7.0'" Remove="**\*.net7.0.cs" />
+    <Compile Condition="'$(TargetFramework)'!='net6.0'" Remove="**\*.net6.0.cs" />
+    <Compile Condition="'$(TargetFramework)'!='net5.0'" Remove="**\*.net5.0.cs" />
     <Compile Condition="'$(TargetFramework)'!='net40'" Remove="**\*.net40.cs" />
     <Compile Condition="'$(TargetFramework)'!='netstandard1.0'" Remove="**\*.netstandard1.0.cs" />
     <Compile Condition="'$(TargetFramework)'!='netstandard1.3'" Remove="**\*.netstandard1.3.cs" />

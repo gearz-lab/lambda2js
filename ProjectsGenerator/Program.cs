@@ -22,15 +22,19 @@ namespace ProjectsGenerator
                 { "NuGet.Signed.Tests" },
             };
 
+            Console.WriteLine($"Environment.CurrentDirectory = {Environment.CurrentDirectory}");
+
             foreach (var testGroup in testGroups)
             {
                 var groupName = testGroup.Name;
+                Console.WriteLine("");
+                Console.WriteLine($"groupName = {groupName}");
 
                 var testsProjXml = new XmlDocument();
                 var pathProj = $"../{ProjectName}.Tests/{ProjectName}.{groupName}.csproj";
+                Console.WriteLine($"pathProj = {pathProj}");
 
                 FindAndSetCurrentPath(pathProj);
-                Console.WriteLine($"Environment.CurrentDirectory = {Environment.CurrentDirectory}");
 
                 testsProjXml.Load(pathProj);
 
@@ -39,15 +43,17 @@ namespace ProjectsGenerator
                 var targets = targetsElement[0].InnerText.Split(";");
                 foreach (var target in targets)
                 {
-                    if (File.Exists($"../{ProjectName}.Tests/{ProjectName}.{groupName}.{target}.csproj"))
-                        continue;
+                    //if (File.Exists($"../{ProjectName}.Tests/{ProjectName}.{groupName}.{target}.csproj"))
+                    //    continue;
 
                     var testProjXml_2 = (XmlDocument)testsProjXml.Clone();
                     var node = testProjXml_2.SelectSingleNode("//TargetFrameworks");
                     var targetElement = testProjXml_2.CreateElement("TargetFramework");
                     targetElement.InnerText = target;
                     node.ParentNode.ReplaceChild(targetElement, node);
-                    testProjXml_2.Save($"../{ProjectName}.Tests/{ProjectName}.{groupName}.{target}.csproj");
+                    var targetPath = $"../{ProjectName}.Tests/{ProjectName}.{groupName}.{target}.csproj";
+                    testProjXml_2.Save(targetPath);
+                    Console.WriteLine($"targetPath = {targetPath}");
                 }
 
             }
@@ -59,11 +65,15 @@ namespace ProjectsGenerator
 
             {
 
+                var groupName = "NuGet.Tests";
+                Console.WriteLine("");
+                Console.WriteLine($"groupName = {groupName}");
+
                 var testsProjXml = new XmlDocument();
-                var pathProj = $"../{ProjectName}.Tests/{ProjectName}.NuGet.Tests.csproj";
+                var pathProj = $"../{ProjectName}.Tests/{ProjectName}.{groupName}.csproj";
+                Console.WriteLine($"pathProj = {pathProj}");
 
                 FindAndSetCurrentPath(pathProj);
-                Console.WriteLine($"Environment.CurrentDirectory = {Environment.CurrentDirectory}");
 
                 testsProjXml.Load(pathProj);
 
@@ -72,15 +82,17 @@ namespace ProjectsGenerator
                 var targets = targetsElement[0].InnerText.Split(";");
                 foreach (var target in targets)
                 {
-                    if (File.Exists($"../{ProjectName}.Tests/{ProjectName}.NuGet.Tests.{target}.csproj"))
-                        continue;
+                    //if (File.Exists($"../{ProjectName}.Tests/{ProjectName}.{groupName}.{target}.csproj"))
+                    //    continue;
 
                     var testProjXml_2 = (XmlDocument)testsProjXml.Clone();
                     var node = testProjXml_2.SelectSingleNode("//TargetFrameworks");
                     var targetElement = testProjXml_2.CreateElement("TargetFramework");
                     targetElement.InnerText = target;
                     node.ParentNode.ReplaceChild(targetElement, node);
-                    testProjXml_2.Save($"../{ProjectName}.Tests/{ProjectName}.NuGet.Tests.{target}.csproj");
+                    var targetPath = $"../{ProjectName}.Tests/{ProjectName}.{groupName}.{target}.csproj";
+                    testProjXml_2.Save(targetPath);
+                    Console.WriteLine($"targetPath = {targetPath}");
                 }
 
             }
