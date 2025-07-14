@@ -62,6 +62,10 @@ See the project page for more.</Description>
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="LICENSE.txt" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" PrivateAssets="all" />
   </ItemGroup>
 
